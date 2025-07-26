@@ -6,7 +6,7 @@ node: '('RULE node+')' #ruleNode
     | '('TOKEN STRING')' #tokenNode
     ;
 
-tokenList
+list
     : token+ EOF
     ;
 

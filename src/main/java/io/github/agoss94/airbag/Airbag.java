@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 public class Airbag {
 
-    public static List<? extends Token> tokenList(Class<? extends Lexer> grammarClass, String input) {
+    public static List<Token> tokenList(Class<? extends Lexer> grammarClass, String input) {
         try {
             Lexer lexer = grammarClass.getConstructor(CharStream.class).newInstance(CharStreams.fromString(
                     input));

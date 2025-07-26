@@ -31,11 +31,11 @@ public interface AirbagVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTokenNode(AirbagParser.TokenNodeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AirbagParser#tokenList}.
+	 * Visit a parse tree produced by {@link AirbagParser#list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTokenList(AirbagParser.TokenListContext ctx);
+	T visitList(AirbagParser.ListContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AirbagParser#token}.
 	 * @param ctx the parse tree

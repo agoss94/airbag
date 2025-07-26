@@ -42,15 +42,15 @@ public interface AirbagListener extends ParseTreeListener {
 	 */
 	void exitTokenNode(AirbagParser.TokenNodeContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link AirbagParser#tokenList}.
+	 * Enter a parse tree produced by {@link AirbagParser#list}.
 	 * @param ctx the parse tree
 	 */
-	void enterTokenList(AirbagParser.TokenListContext ctx);
+	void enterList(AirbagParser.ListContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link AirbagParser#tokenList}.
+	 * Exit a parse tree produced by {@link AirbagParser#list}.
 	 * @param ctx the parse tree
 	 */
-	void exitTokenList(AirbagParser.TokenListContext ctx);
+	void exitList(AirbagParser.ListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link AirbagParser#token}.
 	 * @param ctx the parse tree

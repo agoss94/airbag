@@ -53,13 +53,13 @@ public class AirbagBaseListener implements AirbagListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTokenList(AirbagParser.TokenListContext ctx) { }
+	@Override public void enterList(AirbagParser.ListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTokenList(AirbagParser.TokenListContext ctx) { }
+	@Override public void exitList(AirbagParser.ListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

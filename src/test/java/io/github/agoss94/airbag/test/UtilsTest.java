@@ -55,12 +55,12 @@ class UtilsTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         AirbagParser parser = new AirbagParser(tokens);
         parser.removeErrorListeners();
-        AirbagParser.TokenListContext tree = parser.tokenList();
+        AirbagParser.ListContext tree = parser.list();
 
         String result =  Utils.formatTreeString(Utils.toStringTree(tree, parser));
 
         String expected = """
-                (tokenlist
+                (list
                   (token
                     (LITERAL '[@')
                     (INT '0')
@@ -118,12 +118,12 @@ class UtilsTest {
         AirbagLexer lexer = new AirbagLexer(CharStreams.fromString(input));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         AirbagParser parser = new AirbagParser(tokens);
-        AirbagParser.TokenListContext tree = parser.tokenList();
+        AirbagParser.ListContext tree = parser.list();
 
         String result =  Utils.formatTreeString(Utils.toStringTree(tree, parser));
 
         String expected = """
-                (tokenlist
+                (list
                   (token
                     (LITERAL '[@')
                     (INT '0')

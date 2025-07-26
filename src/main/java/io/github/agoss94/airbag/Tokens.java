@@ -154,7 +154,7 @@ public class Tokens {
         }
 
         public List<Token> parseTokens(String input) {
-            return getVisitor(vocabulary).visitTokenList(getParser(input).tokenList());
+            return getVisitor(vocabulary).visitList(getParser(input).list());
         }
 
         private TokenVisitor getVisitor(Vocabulary vocabulary) {
@@ -186,7 +186,7 @@ public class Tokens {
             builder.startIndex(Integer.parseInt(ctx.startIndex.getText()));
             builder.stopIndex(Integer.parseInt(ctx.stopIndex.getText()));
             // Remove the surrounding quotes from the string literal
-            String text = ctx.text.getText();
+            String text = replaceEscapedCharacters(ctx.text.getText());
             builder.text(text.substring(1, text.length() - 1));
             builder.type(getTokenType(ctx.type.getText()));
 
@@ -203,7 +203,7 @@ public class Tokens {
         }
 
         @Override
-        public List<Token> visitTokenList(AirbagParser.TokenListContext ctx) {
+        public List<Token> visitList(AirbagParser.ListContext ctx) {
             return ctx.token().stream().map(this::visitToken).toList();
         }
 
@@ -225,6 +225,15 @@ public class Tokens {
                 }
             }
             throw new IllegalArgumentException("Type \"%s\" not found in vocabulary".formatted(type));
+        }
+
+        private String replaceEscapedCharacters(String txt) {
+            if ( txt!=null ) {
+                txt = txt.replace("\\n","\n");
+                txt = txt.replace("\\r","\r");
+                txt = txt.replace("\\t","\t");
+            }
+            return txt;
         }
     }
 }
