@@ -1,6 +1,6 @@
 grammar Airbag;
 
-tree: node EOF;
+schema: node EOF;
 
 node: '('RULE node+')' #ruleNode
     | '('TOKEN STRING')' #tokenNode
