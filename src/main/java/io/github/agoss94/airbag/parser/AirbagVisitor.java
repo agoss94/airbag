@@ -11,11 +11,11 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface AirbagVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link AirbagParser#tree}.
+	 * Visit a parse tree produced by {@link AirbagParser#schema}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTree(AirbagParser.TreeContext ctx);
+	T visitSchema(AirbagParser.SchemaContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ruleNode}
 	 * labeled alternative in {@link AirbagParser#node}.

@@ -8,15 +8,15 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface AirbagListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link AirbagParser#tree}.
+	 * Enter a parse tree produced by {@link AirbagParser#schema}.
 	 * @param ctx the parse tree
 	 */
-	void enterTree(AirbagParser.TreeContext ctx);
+	void enterSchema(AirbagParser.SchemaContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link AirbagParser#tree}.
+	 * Exit a parse tree produced by {@link AirbagParser#schema}.
 	 * @param ctx the parse tree
 	 */
-	void exitTree(AirbagParser.TreeContext ctx);
+	void exitSchema(AirbagParser.SchemaContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ruleNode}
 	 * labeled alternative in {@link AirbagParser#node}.

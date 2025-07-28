@@ -20,10 +20,10 @@ public class AirbagParser extends Parser {
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, RULE=11, TOKEN=12, INT=13, STRING=14, WS=15;
 	public static final int
-		RULE_tree = 0, RULE_node = 1, RULE_list = 2, RULE_token = 3;
+		RULE_schema = 0, RULE_node = 1, RULE_list = 2, RULE_token = 3;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"tree", "node", "list", "token"
+			"schema", "node", "list", "token"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -93,33 +93,33 @@ public class AirbagParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class TreeContext extends ParserRuleContext {
+	public static class SchemaContext extends ParserRuleContext {
 		public NodeContext node() {
 			return getRuleContext(NodeContext.class,0);
 		}
 		public TerminalNode EOF() { return getToken(AirbagParser.EOF, 0); }
-		public TreeContext(ParserRuleContext parent, int invokingState) {
+		public SchemaContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_tree; }
+		@Override public int getRuleIndex() { return RULE_schema; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AirbagListener ) ((AirbagListener)listener).enterTree(this);
+			if ( listener instanceof AirbagListener ) ((AirbagListener)listener).enterSchema(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AirbagListener ) ((AirbagListener)listener).exitTree(this);
+			if ( listener instanceof AirbagListener ) ((AirbagListener)listener).exitSchema(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof AirbagVisitor ) return ((AirbagVisitor<? extends T>)visitor).visitTree(this);
+			if ( visitor instanceof AirbagVisitor ) return ((AirbagVisitor<? extends T>)visitor).visitSchema(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final TreeContext tree() throws RecognitionException {
-		TreeContext _localctx = new TreeContext(_ctx, getState());
-		enterRule(_localctx, 0, RULE_tree);
+	public final SchemaContext schema() throws RecognitionException {
+		SchemaContext _localctx = new SchemaContext(_ctx, getState());
+		enterRule(_localctx, 0, RULE_schema);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{

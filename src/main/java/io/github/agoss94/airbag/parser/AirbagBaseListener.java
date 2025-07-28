@@ -17,13 +17,13 @@ public class AirbagBaseListener implements AirbagListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTree(AirbagParser.TreeContext ctx) { }
+	@Override public void enterSchema(AirbagParser.SchemaContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTree(AirbagParser.TreeContext ctx) { }
+	@Override public void exitSchema(AirbagParser.SchemaContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

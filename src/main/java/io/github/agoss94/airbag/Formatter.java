@@ -18,7 +18,7 @@ public class Formatter {
         AirbagParser parser = new AirbagParser(tokenStream);
         Listener listener = new Listener();
         ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(listener, parser.tree());
+        walker.walk(listener, parser.schema());
         return listener.format();
     }
 
