@@ -1,8 +1,8 @@
-package io.github.agoss94.airbag;
+package io.github.agoss94.airbag.core;
 
-import io.github.agoss94.airbag.parser.AirbagBaseListener;
-import io.github.agoss94.airbag.parser.AirbagLexer;
-import io.github.agoss94.airbag.parser.AirbagParser;
+import io.github.agoss94.airbag.parser.SchemaBaseListener;
+import io.github.agoss94.airbag.parser.SchemaLexer;
+import io.github.agoss94.airbag.parser.SchemaParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -13,16 +13,16 @@ public class Formatter {
 
     public static String formatStringTree(String tree) {
         CharStream charStream = CharStreams.fromString(tree);
-        AirbagLexer lexer = new AirbagLexer(charStream);
+        SchemaLexer lexer = new SchemaLexer(charStream);
         TokenStream tokenStream = new CommonTokenStream(lexer);
-        AirbagParser parser = new AirbagParser(tokenStream);
+        SchemaParser parser = new SchemaParser(tokenStream);
         Listener listener = new Listener();
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, parser.schema());
         return listener.format();
     }
 
-    private static class Listener extends AirbagBaseListener {
+    private static class Listener extends SchemaBaseListener {
 
         int indentLevel = 0;
         StringBuilder stringBuilder;
@@ -32,7 +32,7 @@ public class Formatter {
         }
 
         @Override
-        public void enterRuleNode(AirbagParser.RuleNodeContext ctx) {
+        public void enterRuleNode(SchemaParser.RuleNodeContext ctx) {
             stringBuilder.append("  ".repeat(indentLevel));
             stringBuilder.append("(%s%n".formatted(ctx.RULE().getText()));
             indentLevel++;
@@ -40,14 +40,14 @@ public class Formatter {
         }
 
         @Override
-        public void exitRuleNode(AirbagParser.RuleNodeContext ctx) {
+        public void exitRuleNode(SchemaParser.RuleNodeContext ctx) {
             indentLevel--;
             stringBuilder.append("  ".repeat(indentLevel));
             stringBuilder.append(")%n".formatted());
         }
 
         @Override
-        public void enterTokenNode(AirbagParser.TokenNodeContext ctx) {
+        public void enterTokenNode(SchemaParser.TokenNodeContext ctx) {
             stringBuilder.append("  ".repeat(indentLevel));
             stringBuilder.append("(%s %s)%n".formatted(ctx.TOKEN().getText(), ctx.STRING().getText()));
         }

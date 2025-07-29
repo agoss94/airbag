@@ -1,54 +1,131 @@
 package io.github.agoss94.airbag;
 
-import io.github.agoss94.airbag.parser.AirbagBaseVisitor;
-import io.github.agoss94.airbag.parser.AirbagLexer;
-import io.github.agoss94.airbag.parser.AirbagParser;
 import org.antlr.v4.runtime.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-public class Tokens {
+/**
+ * Utility class for working with ANTLR {@link Token}s.
+ */
+public final class Tokens {
 
+
+    /**
+     * The pattern to parse a single token from a string.
+     */
+    private static final Pattern PATTERN = Pattern.compile(
+            "[@](\\d+),(\\d+):(\\d+)='(.*)',<(.*)>,(channel=(\\d+),)?(\\d+):(\\d+)]");
+
+
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private Tokens() {
     }
 
-    public static String toString(Token token, Recognizer<?, ?> r) {
-        String channelStr = "";
-        if (token.getChannel() > 0) {
-            channelStr = ",channel=" + token.getChannel();
+    /**
+     * Creates a list of {@link Token}s from a given lexer class and input string.
+     *
+     * @param grammarClass the lexer class to use for tokenizing the input.
+     * @param input        the input string to tokenize.
+     * @return a list of {@link Token}s generated from the input.
+     * @throws RuntimeException if the lexer cannot be instantiated or an error occurs during tokenization.
+     */
+    public static List<Token> from(Class<? extends Lexer> grammarClass, String input) {
+        try {
+            Lexer lexer = grammarClass.getConstructor(CharStream.class).newInstance(CharStreams.fromString(
+                    input));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            tokens.fill(); // Populate the token stream
+            return tokens.getTokens();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to test lexer", e);
         }
-        String txt = token.getText();
-        if (txt != null) {
-            txt = txt.replace("\n", "\\n");
-            txt = txt.replace("\r", "\\r");
-            txt = txt.replace("\t", "\\t");
-        } else {
-            txt = "<no text>";
-        }
-        String typeString = String.valueOf(token.getType());
-        if (r != null) {
-            typeString = r.getVocabulary().getDisplayName(token.getType());
-        }
-        return "[@" +
-                token.getTokenIndex() +
-                "," +
-                token.getStartIndex() +
-                ":" +
-                token.getStopIndex() +
-                "='" +
-                txt +
-                "',<" +
-                typeString +
-                ">" +
-                channelStr +
-                "," +
-                token.getLine() +
-                ":" +
-                token.getCharPositionInLine() +
-                "]";
     }
 
+    /**
+     * Creates a list of {@link Token}s from a given input string.
+     *
+     * @param input the input string to tokenize.
+     * @return a list of {@link Token}s.
+     */
+    public static List<Token> from(String input) {
+        return from((Vocabulary) null, input);
+    }
+
+    /**
+     * Creates a list of {@link Token}s from a given vocabulary and input string.
+     *
+     * @param vocabulary the ANTLR vocabulary.
+     * @param input      the input string to tokenize.
+     * @return a list of {@link Token}s.
+     */
+    public static List<Token> from(Vocabulary vocabulary, String input) {
+        if (input.isBlank()) {
+            return List.of();
+        }
+        String[] lines = input.split("\r?\n");
+        return Stream.of(lines).map(t -> singleToken(vocabulary, t)).toList();
+    }
+
+    /**
+     * Creates a single {@link Token} from a given vocabulary and input string.
+     *
+     * @param vocabulary the ANTLR vocabulary.
+     * @param input      the input string to tokenize.
+     * @return a single {@link Token}.
+     */
+    public static Token singleToken(Vocabulary vocabulary, String input) {
+        Matcher matcher = PATTERN.matcher(input);
+        if (matcher.matches()) {
+            var token = new CommonToken(getTokenType(vocabulary, matcher.group(5)),
+                    matcher.group(4));
+            token.setTokenIndex(Integer.parseInt(matcher.group(1)));
+            token.setStartIndex(Integer.parseInt(matcher.group(2)));
+            token.setStopIndex(Integer.parseInt(matcher.group(3)));
+            token.setChannel(matcher.group(6) != null ? Integer.parseInt(matcher.group(7)) : 0);
+            token.setLine(Integer.parseInt(matcher.group(8)));
+            token.setCharPositionInLine(Integer.parseInt(matcher.group(9)));
+            return token;
+        } else {
+            throw new RuntimeException("The line: \"%s\" does not match the pattern.".formatted(
+                    input));
+        }
+    }
+
+    /**
+     * Returns the token type for the given symbolic name.
+     *
+     * @param voc  the ANTLR vocabulary.
+     * @param type the symbolic name of the token type.
+     * @return the token type.
+     */
+    private static int getTokenType(Vocabulary voc, String type) {
+        if (type.matches("-?\\d+")) {
+            return Integer.parseInt(type);
+        }
+        for (int i = 0; i < voc.getMaxTokenType() + 1; i++) {
+            if (type.equals("EOF")) {
+                return Token.EOF;
+            }
+            if (Objects.equals(voc.getSymbolicName(i), type)) {
+                return i;
+            }
+        }
+        throw new RuntimeException("Type \"%s\" not found".formatted(type));
+    }
+
+    /**
+     * Checks if two {@link Token}s are equal by comparing their properties.
+     *
+     * @param t1 the first token.
+     * @param t2 the second token.
+     * @return {@code true} if the tokens are equal, {@code false} otherwise.
+     */
     public static boolean isEqual(Token t1, Token t2) {
         if (t1 == t2) {
             return true;
@@ -64,176 +141,5 @@ public class Tokens {
                 && t1.getStartIndex() == t2.getStartIndex()
                 && t1.getStopIndex() == t2.getStopIndex()
                 && Objects.equals(t1.getText(), t2.getText());
-    }
-
-    public static class Builder {
-
-        private String text;
-        private int type;
-        private int line;
-        private int charPositionInLine;
-        private int channel;
-        private int tokenIndex;
-        private int startIndex;
-        private int stopIndex;
-
-        public Builder() {
-            text = null;
-            type = 0;
-            line = -1;
-            charPositionInLine = -1;
-            channel = -1;
-            tokenIndex = -1;
-            startIndex = -1;
-            stopIndex = -1;
-        }
-
-        public Builder text(String text) {
-            this.text = text;
-            return this;
-        }
-
-        public Builder type(int type) {
-            this.type = type;
-            return this;
-        }
-
-        public Builder line(int line) {
-            this.line = line;
-            return this;
-        }
-
-        public Builder charPositionInLine(int charPositionInLine) {
-            this.charPositionInLine = charPositionInLine;
-            return this;
-        }
-
-        public Builder channel(int channel) {
-            this.channel = channel;
-            return this;
-        }
-
-        public Builder tokenIndex(int tokenIndex) {
-            this.tokenIndex = tokenIndex;
-            return this;
-        }
-
-        public Builder startIndex(int startIndex) {
-            this.startIndex = startIndex;
-            return this;
-        }
-
-        public Builder stopIndex(int stopIndex) {
-            this.stopIndex = stopIndex;
-            return this;
-        }
-
-        public Token build() {
-            var token = new CommonToken(type);
-            token.setText(text);
-            token.setLine(line);
-            token.setCharPositionInLine(charPositionInLine);
-            token.setChannel(channel);
-            token.setTokenIndex(tokenIndex);
-            token.setStartIndex(startIndex);
-            token.setStopIndex(stopIndex);
-            return token;
-        }
-    }
-
-    public static class Parser {
-
-        private final Vocabulary vocabulary;
-
-        public Parser(Vocabulary vocabulary) {
-            this.vocabulary = vocabulary;
-        }
-
-        public Token parseToken(String input) {
-            return getVisitor(vocabulary).visitToken(getParser(input).token());
-        }
-
-        public List<Token> parseTokens(String input) {
-            return getVisitor(vocabulary).visitList(getParser(input).list());
-        }
-
-        private TokenVisitor getVisitor(Vocabulary vocabulary) {
-            var visitor = new TokenVisitor();
-            visitor.setVocabulary(vocabulary);
-            return visitor;
-        }
-
-        private AirbagParser getParser(String input) {
-            AirbagLexer lexer = new AirbagLexer(CharStreams.fromString(input));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            return new AirbagParser(tokens);
-        }
-
-    }
-
-    private static class TokenVisitor extends AirbagBaseVisitor<Object> {
-
-        private Vocabulary vocabulary;
-
-        public void setVocabulary(Vocabulary vocabulary) {
-            this.vocabulary = vocabulary;
-        }
-
-        @Override
-        public Token visitToken(AirbagParser.TokenContext ctx) {
-            Tokens.Builder builder = new Builder();
-            builder.tokenIndex(Integer.parseInt(ctx.tokenIndex.getText()));
-            builder.startIndex(Integer.parseInt(ctx.startIndex.getText()));
-            builder.stopIndex(Integer.parseInt(ctx.stopIndex.getText()));
-            // Remove the surrounding quotes from the string literal
-            String text = replaceEscapedCharacters(ctx.text.getText());
-            builder.text(text.substring(1, text.length() - 1));
-            builder.type(getTokenType(ctx.type.getText()));
-
-            if (ctx.channel != null) {
-                builder.channel(Integer.parseInt(ctx.channel.getText()));
-            } else {
-                builder.channel(Token.DEFAULT_CHANNEL);
-            }
-
-            builder.line(Integer.parseInt(ctx.line.getText()));
-            builder.charPositionInLine(Integer.parseInt(ctx.charPositionInLine.getText()));
-
-            return builder.build();
-        }
-
-        @Override
-        public List<Token> visitList(AirbagParser.ListContext ctx) {
-            return ctx.token().stream().map(this::visitToken).toList();
-        }
-
-        private int getTokenType(String type) {
-            if (type.matches("-?\\d+")) {
-                return Integer.parseInt(type);
-            }
-            if (vocabulary == null) {
-                throw new IllegalStateException(
-                        "A vocabulary must be provided to resolve symbolic token name: " + type
-                );
-            }
-            if (type.equals("EOF")) {
-                return Token.EOF;
-            }
-            for (int i = 0; i < vocabulary.getMaxTokenType() + 1; i++) {
-                if (Objects.equals(vocabulary.getSymbolicName(i), type)) {
-                    return i;
-                }
-            }
-            throw new IllegalArgumentException("Type \"%s\" not found in vocabulary".formatted(type));
-        }
-
-        private String replaceEscapedCharacters(String txt) {
-            if ( txt!=null ) {
-                txt = txt.replace("\\n","\n");
-                txt = txt.replace("\\r","\r");
-                txt = txt.replace("\\t","\t");
-            }
-            return txt;
-        }
     }
 }
