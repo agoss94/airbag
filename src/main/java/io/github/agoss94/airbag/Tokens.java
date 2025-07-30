@@ -73,16 +73,29 @@ public final class Tokens {
 
     /**
      * Creates a single {@link Token} from a given vocabulary and input string.
+     * The default escape character is {@code %}.
      *
      * @param vocabulary the ANTLR vocabulary.
      * @param input      the input string to tokenize.
      * @return a single {@link Token}.
      */
     public static Token singleToken(Vocabulary vocabulary, String input) {
+        return singleToken(vocabulary, input, "%");
+    }
+
+    /**
+     * Creates a single {@link Token} from a given vocabulary and input string.
+     *
+     * @param vocabulary the ANTLR vocabulary.
+     * @param input      the input string to tokenize.
+     * @param escape     the escape character used for special characters like newline, tab, and carriage return.
+     * @return a single {@link Token}.
+     */
+    public static Token singleToken(Vocabulary vocabulary, String input, String escape) {
         Matcher matcher = PATTERN.matcher(input);
         if (matcher.matches()) {
-            var token = new CommonToken(getTokenType(vocabulary, matcher.group(5)),
-                    matcher.group(4));
+            String text = replaceEscaped(matcher.group(4), escape);
+            var token = new CommonToken(getTokenType(vocabulary, matcher.group(5)), text);
             token.setTokenIndex(Integer.parseInt(matcher.group(1)));
             token.setStartIndex(Integer.parseInt(matcher.group(2)));
             token.setStopIndex(Integer.parseInt(matcher.group(3)));
@@ -114,6 +127,9 @@ public final class Tokens {
             if (Objects.equals(voc.getSymbolicName(i), type)) {
                 return i;
             }
+            if (Objects.equals(voc.getLiteralName(i), type)) {
+                return i;
+            }
         }
         throw new RuntimeException("Type \"%s\" not found".formatted(type));
     }
@@ -140,5 +156,86 @@ public final class Tokens {
                 && t1.getStartIndex() == t2.getStartIndex()
                 && t1.getStopIndex() == t2.getStopIndex()
                 && Objects.equals(t1.getText(), t2.getText());
+    }
+
+    /**
+     * Returns a string representation of the given token.
+     * The default escape character is {@code %}.
+     *
+     * @param t   the token.
+     * @param voc the ANTLR vocabulary.
+     * @return a string representation of the token.
+     */
+    public static String toString(Token t, Vocabulary voc) {
+        return toString(t, voc, "%");
+    }
+
+    /**
+     * Returns a string representation of the given token.
+     *
+     * @param t      the token.
+     * @param voc    the ANTLR vocabulary.
+     * @param escape the escape character used for special characters like newline, tab, and carriage return.
+     * @return a string representation of the token.
+     */
+    public static String toString(Token t, Vocabulary voc, String escape) {
+        String channelStr = "";
+        if (t.getChannel() > 0) {
+            channelStr = ",channel=" + t.getChannel();
+        }
+        String txt = t.getText();
+        if (txt != null) {
+            txt = txt.replace("\n", "%sn".formatted(escape));
+            txt = txt.replace("\r", "%sr".formatted(escape));
+            txt = txt.replace("\t", "%st".formatted(escape));
+        } else {
+            txt = "<no text>";
+        }
+        int type = t.getType();
+        String typeString = String.valueOf(type);
+        if (voc != null) {
+            String symbolicName = voc.getSymbolicName(type);
+            String literalName = voc.getLiteralName(type);
+            if (symbolicName != null) {
+                typeString = symbolicName;
+            } else if (literalName != null) {
+                typeString = literalName;
+            }
+        }
+        return "[@" +
+                t.getTokenIndex() +
+                "," +
+                t.getStartIndex() +
+                ":" +
+                t.getStopIndex() +
+                "='" +
+                txt +
+                "',<" +
+                typeString +
+                ">" +
+                channelStr +
+                "," +
+                t.getLine() +
+                ":" +
+                t.getCharPositionInLine() +
+                "]";
+    }
+
+    /**
+     * Replaces escaped characters in the given string with their original characters.
+     *
+     * @param txt    the string to replace.
+     * @param escape the escape character.
+     * @return the replaced string.
+     */
+    private static String replaceEscaped(String txt, String escape) {
+        if (txt != null) {
+            txt = txt.replace("%sn".formatted(escape), "\n");
+            txt = txt.replace("%sr".formatted(escape), "\r");
+            txt = txt.replace("%st".formatted(escape), "\t");
+            return txt;
+        } else {
+            return null;
+        }
     }
 }
