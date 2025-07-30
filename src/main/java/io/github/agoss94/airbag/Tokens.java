@@ -13,13 +13,12 @@ import java.util.stream.Stream;
  */
 public final class Tokens {
 
-
     /**
      * The pattern to parse a single token from a string.
      */
     private static final Pattern PATTERN = Pattern.compile(
-            "[@](\\d+),(\\d+):(\\d+)='(.*)',<(.*)>,(channel=(\\d+),)?(\\d+):(\\d+)]");
-
+            "\\[@(-?\\d+),(\\d+):(\\d+)='(.*)',<(.*)>,(channel=(-?\\d+),)?(\\d+):(\\d+)]"
+    );
 
     /**
      * Private constructor to prevent instantiation.
