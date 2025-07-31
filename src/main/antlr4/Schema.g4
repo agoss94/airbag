@@ -2,8 +2,9 @@ grammar Schema;
 
 schema: node EOF;
 
-node: '('RULE node+')' #ruleNode
-    | '('TOKEN STRING')' #tokenNode
+node: '('RULE node+')'
+    | '('TOKEN STRING')'
+    | STRING
     ;
 
 // --- Lexer Rules ---

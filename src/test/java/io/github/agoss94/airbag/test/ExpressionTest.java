@@ -88,9 +88,9 @@ class ExpressionTest {
     void testBlankLine() {
         var actual = Tokens.from(ExpressionLexer.class, "\n");
         var expected = Tokens.from(ExpressionLexer.VOCABULARY, """
-        [@0,0:0='%n',<NEWLINE>,1:0]
-        [@1,1:0='<EOF>',<EOF>,2:0]
-        """);
-        airbag.assertTokenList(expected, actual);
+                [@0,0:0='%n',<NEWLINE>,1:0]
+                [@1,1:0='<EOF>',<EOF>,2:0]
+                """);
+            airbag.assertTokenList(expected, actual);
     }
 }
