@@ -2,16 +2,30 @@ grammar Schema;
 
 schema: node EOF;
 
-node: '('RULE node+')'
-    | '('TOKEN STRING')'
-    | STRING
+node
+    : rule
+    | token
+    | error
+    ;
+
+rule
+    : '(' index = (INT | RULE) node+ ')'
+    ;
+token
+    : '(' index = (INT | TOKEN) STRING ')' #symbolic
+    | STRING #literal
+    ;
+error
+    : '(' ERROR token ')'
     ;
 
 // --- Lexer Rules ---
-RULE            : [a-z][a-zA-Z0-9_]*;
-TOKEN            : [A-Z][a-zA-Z0-9_]*;
-STRING        : '\'' (ESC | .)*? '\'';
-WS            : [ \t\r\n]+ -> skip;
+ERROR: '<error>';
+RULE: [a-z][a-zA-Z0-9_]*;
+TOKEN: [A-Z][a-zA-Z0-9_]*;
+INT: '-'?[0-9]+;
+STRING: '\'' (ESC | .)*? '\'';
+WS: [ \t\r\n]+ -> skip;
 
 // --- Fragments ---
-fragment ESC           : '\\'['tnfr];
+fragment ESC: '\\'['tnfr];

@@ -1,8 +1,11 @@
 T__0=1
 T__1=2
-RULE=3
-TOKEN=4
-STRING=5
-WS=6
+ERROR=3
+RULE=4
+TOKEN=5
+INT=6
+STRING=7
+WS=8
 '('=1
 ')'=2
+'<error>'=3
