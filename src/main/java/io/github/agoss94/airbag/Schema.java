@@ -109,14 +109,6 @@ public sealed interface Schema permits Schema.Rule, Schema.Terminal, Schema.Erro
          */
         Token token();
 
-        /**
-         * Returns the token type of the underlying token.
-         * @return the token type.
-         */
-        @Override
-        default int index() {
-            return token().getType();
-        }
     }
 
     /**
@@ -134,13 +126,5 @@ public sealed interface Schema permits Schema.Rule, Schema.Terminal, Schema.Erro
          */
         Token token();
 
-        /**
-         * Returns the token type of the underlying error token.
-         * @return the token type.
-         */
-        @Override
-        default int index() {
-            return token().getType();
-        }
     }
 }

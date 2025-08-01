@@ -6,6 +6,9 @@ import io.github.agoss94.airbag.grammar.ExpressionLexer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for the {@link Airbag} assertion methods.
+ */
 class AssertionTest {
 
     private Airbag airbag;

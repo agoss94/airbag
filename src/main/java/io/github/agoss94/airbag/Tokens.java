@@ -95,7 +95,7 @@ public final class Tokens {
         Matcher matcher = PATTERN.matcher(input);
         if (matcher.matches()) {
             String text = replaceEscaped(matcher.group(4), escape);
-            var token = new CommonToken(getTokenType(vocabulary, matcher.group(5)), text);
+            var token = new CommonToken(getTokenType(matcher.group(5), vocabulary), text);
             token.setTokenIndex(Integer.parseInt(matcher.group(1)));
             token.setStartIndex(Integer.parseInt(matcher.group(2)));
             token.setStopIndex(Integer.parseInt(matcher.group(3)));
@@ -112,11 +112,11 @@ public final class Tokens {
     /**
      * Returns the token type for the given symbolic name.
      *
-     * @param voc  the ANTLR vocabulary.
      * @param type the symbolic name of the token type.
+     * @param voc  the ANTLR vocabulary.
      * @return the token type.
      */
-    private static int getTokenType(Vocabulary voc, String type) {
+    public static int getTokenType(String type, Vocabulary voc) {
         if (type.matches("-?\\d+")) {
             return Integer.parseInt(type);
         }

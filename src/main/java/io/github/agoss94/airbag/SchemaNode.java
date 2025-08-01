@@ -69,22 +69,7 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
      */
     @Override
     public String toString() {
-        switch (this) {
-            case Rule rule -> {
-                var sb = new StringBuilder("(%s".formatted(name()));
-                for (int i = 0; i < rule.getChildCount(); i++) {
-                    sb.append(" %s".formatted(rule.getChild(i)));
-                }
-                sb.append(")");
-                return sb.toString();
-            }
-            case Terminal terminal -> {
-                return "(%s '%s')".formatted(name(), terminal.token().getText());
-            }
-            case Error error -> {
-                return "(<error> (%s '%s'))".formatted(name(), error.token().getText());
-            }
-        }
+        return Schemas.toString((Schema) this, null);
     }
 
     /**
@@ -138,12 +123,11 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
         /**
          * Constructs a new {@link SchemaNode.Terminal} with the given index, token and parent.
          *
-         * @param index  the index of the node.
          * @param token  the ANTLR token.
          * @param parent the parent of the node.
          */
-        public Terminal(int index, Token token, Schema parent) {
-            super(index, parent);
+        public Terminal(Token token, Schema parent) {
+            super(token.getType(), parent);
             this.token = token;
         }
 
@@ -170,12 +154,11 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
         /**
          * Constructs a new {@link SchemaNode.Error} with the given index, token and parent.
          *
-         * @param index  the index of the node.
          * @param token  the ANTLR token.
          * @param parent the parent of the node.
          */
-        public Error(int index, Token token, Schema parent) {
-            super(index, parent);
+        public Error(Token token, Schema parent) {
+            super(token.getType(), parent);
             this.token = token;
         }
 
