@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.Token;
  * and uniform way to navigate the tree structure, access node properties, and compare
  * an actual parse result against an expected structure.
  */
-public sealed interface Schema permits Schema.RuleSchema, Schema.TerminalSchema, Schema.ErrorSchema {
+public sealed interface Schema permits Schema.Rule, Schema.Terminal, Schema.Error {
 
     /**
      * Returns the name of the node.
@@ -30,21 +30,6 @@ public sealed interface Schema permits Schema.RuleSchema, Schema.TerminalSchema,
      */
     Schema getParent();
 
-    /**
-     * Returns the child of this node at the specified index.
-     *
-     * @param i the index of the child to return.
-     * @return the child {@code Schema} node at the given index.
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= getChildCount()).
-     */
-    Schema getChild(int i);
-
-    /**
-     * Returns the number of children of this node.
-     *
-     * @return the number of children.
-     */
-    int getChildCount();
 
     /**
      * Converts the validation tree to an S-expression representation.
@@ -85,7 +70,7 @@ public sealed interface Schema permits Schema.RuleSchema, Schema.TerminalSchema,
      *
      * @return a string representing the tree in S-expression format.
      */
-    String toStringTree();
+    String toString();
 
     /**
      * A {@link Schema} node that represents a non-terminal parser rule.
@@ -93,8 +78,24 @@ public sealed interface Schema permits Schema.RuleSchema, Schema.TerminalSchema,
      * This corresponds to a {@code RuleNode} in the ANTLR parse tree. It serves as an internal node
      * in the schema tree and has children that are other rules or terminals.
      */
-    non-sealed interface RuleSchema extends Schema {
 
+    non-sealed interface Rule extends Schema {
+
+        /**
+         * Returns the child of this node at the specified index.
+         *
+         * @param i the index of the child to return.
+         * @return the child {@code Schema} node at the given index.
+         * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= getChildCount()).
+         */
+        Schema getChild(int i);
+
+        /**
+         * Returns the number of children of this node.
+         *
+         * @return the number of children.
+         */
+        int getChildCount();
     }
 
     /**
@@ -103,7 +104,7 @@ public sealed interface Schema permits Schema.RuleSchema, Schema.TerminalSchema,
      * This corresponds to a {@code TerminalNode} in the ANTLR parse tree. It is a leaf in the
      * schema tree and has no children.
      */
-    non-sealed interface TerminalSchema extends Schema {
+    non-sealed interface Terminal extends Schema {
 
         /**
          * Returns the ANTLR token associated with this terminal node.
@@ -115,6 +116,14 @@ public sealed interface Schema permits Schema.RuleSchema, Schema.TerminalSchema,
          */
         Token token();
 
+        /**
+         * Return {@code true} if the terminal node is a literal, indicating that {@link Schema#name()}
+         * is {@code null}
+         *
+         * @return {@code true} if the terminal node is a literal
+         */
+        boolean isLiteral();
+
     }
 
     /**
@@ -123,7 +132,7 @@ public sealed interface Schema permits Schema.RuleSchema, Schema.TerminalSchema,
      * This corresponds to an {@code ErrorNode} in the ANTLR parse tree. It is a leaf in the
      * schema tree and indicates that the parser encountered an unexpected token.
      */
-    non-sealed interface ErrorSchema extends Schema {
+    non-sealed interface Error extends Schema {
 
         /**
          * Returns the ANTLR token that caused the error.

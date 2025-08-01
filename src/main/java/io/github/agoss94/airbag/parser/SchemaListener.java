@@ -18,27 +18,13 @@ public interface SchemaListener extends ParseTreeListener {
 	 */
 	void exitSchema(SchemaParser.SchemaContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code ruleNode}
-	 * labeled alternative in {@link SchemaParser#node}.
+	 * Enter a parse tree produced by {@link SchemaParser#node}.
 	 * @param ctx the parse tree
 	 */
-	void enterRuleNode(SchemaParser.RuleNodeContext ctx);
+	void enterNode(SchemaParser.NodeContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code ruleNode}
-	 * labeled alternative in {@link SchemaParser#node}.
+	 * Exit a parse tree produced by {@link SchemaParser#node}.
 	 * @param ctx the parse tree
 	 */
-	void exitRuleNode(SchemaParser.RuleNodeContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code tokenNode}
-	 * labeled alternative in {@link SchemaParser#node}.
-	 * @param ctx the parse tree
-	 */
-	void enterTokenNode(SchemaParser.TokenNodeContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code tokenNode}
-	 * labeled alternative in {@link SchemaParser#node}.
-	 * @param ctx the parse tree
-	 */
-	void exitTokenNode(SchemaParser.TokenNodeContext ctx);
+	void exitNode(SchemaParser.NodeContext ctx);
 }

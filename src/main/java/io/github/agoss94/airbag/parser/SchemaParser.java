@@ -139,18 +139,6 @@ public class SchemaParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class NodeContext extends ParserRuleContext {
-		public NodeContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_node; }
-	 
-		public NodeContext() { }
-		public void copyFrom(NodeContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class RuleNodeContext extends NodeContext {
 		public TerminalNode RULE() { return getToken(SchemaParser.RULE, 0); }
 		public List<NodeContext> node() {
 			return getRuleContexts(NodeContext.class);
@@ -158,37 +146,23 @@ public class SchemaParser extends Parser {
 		public NodeContext node(int i) {
 			return getRuleContext(NodeContext.class,i);
 		}
-		public RuleNodeContext(NodeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SchemaListener ) ((SchemaListener)listener).enterRuleNode(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SchemaListener ) ((SchemaListener)listener).exitRuleNode(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SchemaVisitor ) return ((SchemaVisitor<? extends T>)visitor).visitRuleNode(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class TokenNodeContext extends NodeContext {
 		public TerminalNode TOKEN() { return getToken(SchemaParser.TOKEN, 0); }
 		public TerminalNode STRING() { return getToken(SchemaParser.STRING, 0); }
-		public TokenNodeContext(NodeContext ctx) { copyFrom(ctx); }
+		public NodeContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_node; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SchemaListener ) ((SchemaListener)listener).enterTokenNode(this);
+			if ( listener instanceof SchemaListener ) ((SchemaListener)listener).enterNode(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SchemaListener ) ((SchemaListener)listener).exitTokenNode(this);
+			if ( listener instanceof SchemaListener ) ((SchemaListener)listener).exitNode(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SchemaVisitor ) return ((SchemaVisitor<? extends T>)visitor).visitTokenNode(this);
+			if ( visitor instanceof SchemaVisitor ) return ((SchemaVisitor<? extends T>)visitor).visitNode(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -198,11 +172,10 @@ public class SchemaParser extends Parser {
 		enterRule(_localctx, 2, RULE_node);
 		int _la;
 		try {
-			setState(20);
+			setState(21);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 			case 1:
-				_localctx = new RuleNodeContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(7);
@@ -222,13 +195,12 @@ public class SchemaParser extends Parser {
 					setState(12); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-				} while ( _la==T__0 );
+				} while ( _la==T__0 || _la==STRING );
 				setState(14);
 				match(T__1);
 				}
 				break;
 			case 2:
-				_localctx = new TokenNodeContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(16);
@@ -239,6 +211,13 @@ public class SchemaParser extends Parser {
 				match(STRING);
 				setState(19);
 				match(T__1);
+				}
+				break;
+			case 3:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(20);
+				match(STRING);
 				}
 				break;
 			}
@@ -255,22 +234,23 @@ public class SchemaParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u0006\u0017\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u0006\u0018\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0001\u0001\u0001\u0001\u0001"+
 		"\u0004\u0001\u000b\b\u0001\u000b\u0001\f\u0001\f\u0001\u0001\u0001\u0001"+
-		"\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0003\u0001\u0015\b\u0001"+
-		"\u0001\u0001\u0000\u0000\u0002\u0000\u0002\u0000\u0000\u0016\u0000\u0004"+
-		"\u0001\u0000\u0000\u0000\u0002\u0014\u0001\u0000\u0000\u0000\u0004\u0005"+
-		"\u0003\u0002\u0001\u0000\u0005\u0006\u0005\u0000\u0000\u0001\u0006\u0001"+
-		"\u0001\u0000\u0000\u0000\u0007\b\u0005\u0001\u0000\u0000\b\n\u0005\u0003"+
-		"\u0000\u0000\t\u000b\u0003\u0002\u0001\u0000\n\t\u0001\u0000\u0000\u0000"+
-		"\u000b\f\u0001\u0000\u0000\u0000\f\n\u0001\u0000\u0000\u0000\f\r\u0001"+
-		"\u0000\u0000\u0000\r\u000e\u0001\u0000\u0000\u0000\u000e\u000f\u0005\u0002"+
-		"\u0000\u0000\u000f\u0015\u0001\u0000\u0000\u0000\u0010\u0011\u0005\u0001"+
-		"\u0000\u0000\u0011\u0012\u0005\u0004\u0000\u0000\u0012\u0013\u0005\u0005"+
-		"\u0000\u0000\u0013\u0015\u0005\u0002\u0000\u0000\u0014\u0007\u0001\u0000"+
-		"\u0000\u0000\u0014\u0010\u0001\u0000\u0000\u0000\u0015\u0003\u0001\u0000"+
-		"\u0000\u0000\u0002\f\u0014";
+		"\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0003\u0001"+
+		"\u0016\b\u0001\u0001\u0001\u0000\u0000\u0002\u0000\u0002\u0000\u0000\u0018"+
+		"\u0000\u0004\u0001\u0000\u0000\u0000\u0002\u0015\u0001\u0000\u0000\u0000"+
+		"\u0004\u0005\u0003\u0002\u0001\u0000\u0005\u0006\u0005\u0000\u0000\u0001"+
+		"\u0006\u0001\u0001\u0000\u0000\u0000\u0007\b\u0005\u0001\u0000\u0000\b"+
+		"\n\u0005\u0003\u0000\u0000\t\u000b\u0003\u0002\u0001\u0000\n\t\u0001\u0000"+
+		"\u0000\u0000\u000b\f\u0001\u0000\u0000\u0000\f\n\u0001\u0000\u0000\u0000"+
+		"\f\r\u0001\u0000\u0000\u0000\r\u000e\u0001\u0000\u0000\u0000\u000e\u000f"+
+		"\u0005\u0002\u0000\u0000\u000f\u0016\u0001\u0000\u0000\u0000\u0010\u0011"+
+		"\u0005\u0001\u0000\u0000\u0011\u0012\u0005\u0004\u0000\u0000\u0012\u0013"+
+		"\u0005\u0005\u0000\u0000\u0013\u0016\u0005\u0002\u0000\u0000\u0014\u0016"+
+		"\u0005\u0005\u0000\u0000\u0015\u0007\u0001\u0000\u0000\u0000\u0015\u0010"+
+		"\u0001\u0000\u0000\u0000\u0015\u0014\u0001\u0000\u0000\u0000\u0016\u0003"+
+		"\u0001\u0000\u0000\u0000\u0002\f\u0015";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

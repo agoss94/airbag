@@ -29,25 +29,13 @@ public class SchemaBaseListener implements SchemaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterRuleNode(SchemaParser.RuleNodeContext ctx) { }
+	@Override public void enterNode(SchemaParser.NodeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitRuleNode(SchemaParser.RuleNodeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTokenNode(SchemaParser.TokenNodeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTokenNode(SchemaParser.TokenNodeContext ctx) { }
+	@Override public void exitNode(SchemaParser.NodeContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

@@ -17,17 +17,9 @@ public interface SchemaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSchema(SchemaParser.SchemaContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code ruleNode}
-	 * labeled alternative in {@link SchemaParser#node}.
+	 * Visit a parse tree produced by {@link SchemaParser#node}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRuleNode(SchemaParser.RuleNodeContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code tokenNode}
-	 * labeled alternative in {@link SchemaParser#node}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTokenNode(SchemaParser.TokenNodeContext ctx);
+	T visitNode(SchemaParser.NodeContext ctx);
 }

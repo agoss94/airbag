@@ -25,12 +25,5 @@ public class SchemaBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitRuleNode(SchemaParser.RuleNodeContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitTokenNode(SchemaParser.TokenNodeContext ctx) { return visitChildren(ctx); }
+	@Override public T visitNode(SchemaParser.NodeContext ctx) { return visitChildren(ctx); }
 }
