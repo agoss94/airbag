@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The {@code SchemaNode} class is a concrete implementation of the {@link Schema} interface.
@@ -14,9 +13,9 @@ import java.util.Objects;
 public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Terminal, SchemaNode.Error {
 
     /**
-     * The name of the node.
+     * The index of the node.
      */
-    private final String name;
+    private final int index;
 
     /**
      * The parent of the node.
@@ -24,13 +23,13 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
     private final Schema parent;
 
     /**
-     * Constructs a new {@link SchemaNode} with the given name and parent.
+     * Constructs a new {@link SchemaNode} with the given index and parent.
      *
-     * @param name   the name of the node.
+     * @param index  the index of the node.
      * @param parent the parent of the node.
      */
-    protected SchemaNode(String name, Schema parent) {
-        this.name = name;
+    protected SchemaNode(int index, Schema parent) {
+        this.index = index;
         if (parent == null) {
             this.parent = (Schema) this;
         } else if (parent instanceof SchemaNode.Rule rule) {
@@ -45,8 +44,17 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
     /**
      * {@inheritDoc}
      */
-    public String name() {
-        return name;
+    public int index() {
+        return index;
+    }
+
+    /**
+     * Returns the name of the node, which is its index converted to a string.
+     *
+     * @return the string representation of the node's index.
+     */
+    private String name() {
+        return String.valueOf(index);
     }
 
     /**
@@ -71,13 +79,10 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
                 return sb.toString();
             }
             case Terminal terminal -> {
-                if (terminal.isLiteral()) {
-                    return "'%s'".formatted(terminal.token().getText());
-                }
                 return "(%s '%s')".formatted(name(), terminal.token().getText());
             }
             case Error error -> {
-                return "(<error> (%s '%s'))".formatted(error.name(), error.token().getText());
+                return "(<error> (%s '%s'))".formatted(name(), error.token().getText());
             }
         }
     }
@@ -93,13 +98,13 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
         private final List<Schema> children;
 
         /**
-         * Constructs a new {@link SchemaNode.Rule} with the given name and parent.
+         * Constructs a new {@link SchemaNode.Rule} with the given index and parent.
          *
-         * @param name   the name of the node.
+         * @param index  the index of the node.
          * @param parent the parent of the node.
          */
-        public Rule(String name, Schema parent) {
-            super(Objects.requireNonNull(name), parent);
+        public Rule(int index, Schema parent) {
+            super(index, parent);
             children = new ArrayList<>();
         }
 
@@ -131,20 +136,14 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
         private final Token token;
 
         /**
-         * A boolean indicating if the node is a literal.
-         */
-        private final boolean isLiteral;
-
-        /**
-         * Constructs a new {@link SchemaNode.Terminal} with the given name, token and parent.
+         * Constructs a new {@link SchemaNode.Terminal} with the given index, token and parent.
          *
-         * @param name   the name of the node.
+         * @param index  the index of the node.
          * @param token  the ANTLR token.
          * @param parent the parent of the node.
          */
-        public Terminal(String name, Token token, Schema parent) {
-            super(name, parent);
-            isLiteral = name == null;
+        public Terminal(int index, Token token, Schema parent) {
+            super(index, parent);
             this.token = token;
         }
 
@@ -154,14 +153,6 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
         @Override
         public Token token() {
             return token;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isLiteral() {
-            return isLiteral;
         }
 
     }
@@ -177,14 +168,14 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
         private final Token token;
 
         /**
-         * Constructs a new {@link SchemaNode.Error} with the given name, token and parent.
+         * Constructs a new {@link SchemaNode.Error} with the given index, token and parent.
          *
-         * @param name   the name of the node.
+         * @param index  the index of the node.
          * @param token  the ANTLR token.
          * @param parent the parent of the node.
          */
-        public Error(String name, Token token, Schema parent) {
-            super(name, parent);
+        public Error(int index, Token token, Schema parent) {
+            super(index, parent);
             this.token = token;
         }
 

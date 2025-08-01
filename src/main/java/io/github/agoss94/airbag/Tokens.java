@@ -29,12 +29,12 @@ public final class Tokens {
     /**
      * Creates a list of {@link Token}s from a given lexer class and input string.
      *
-     * @param grammarClass the lexer class to use for tokenizing the input.
      * @param input        the input string to tokenize.
+     * @param grammarClass the lexer class to use for tokenizing the input.
      * @return a list of {@link Token}s generated from the input.
      * @throws RuntimeException if the lexer cannot be instantiated or an error occurs during tokenization.
      */
-    public static List<Token> from(Class<? extends Lexer> grammarClass, String input) {
+    public static List<Token> from(String input, Class<? extends Lexer> grammarClass) {
         try {
             Lexer lexer = grammarClass.getConstructor(CharStream.class).newInstance(CharStreams.fromString(
                     input));
@@ -53,22 +53,22 @@ public final class Tokens {
      * @return a list of {@link Token}s.
      */
     public static List<Token> from(String input) {
-        return from((Vocabulary) null, input);
+        return from(input, (Vocabulary) null);
     }
 
     /**
      * Creates a list of {@link Token}s from a given vocabulary and input string.
      *
-     * @param vocabulary the ANTLR vocabulary.
      * @param input      the input string to tokenize.
+     * @param vocabulary the ANTLR vocabulary.
      * @return a list of {@link Token}s.
      */
-    public static List<Token> from(Vocabulary vocabulary, String input) {
+    public static List<Token> from(String input, Vocabulary vocabulary) {
         if (input.isBlank()) {
             return List.of();
         }
         String[] lines = input.split("\r?\n");
-        return Stream.of(lines).map(t -> singleToken(vocabulary, t)).toList();
+        return Stream.of(lines).map(t -> singleToken(t, vocabulary)).toList();
     }
 
     /**
@@ -79,8 +79,8 @@ public final class Tokens {
      * @param input      the input string to tokenize.
      * @return a single {@link Token}.
      */
-    public static Token singleToken(Vocabulary vocabulary, String input) {
-        return singleToken(vocabulary, input, "%");
+    public static Token singleToken(String input, Vocabulary vocabulary) {
+        return singleToken(input,  "%", vocabulary);
     }
 
     /**
@@ -91,7 +91,7 @@ public final class Tokens {
      * @param escape     the escape character used for special characters like newline, tab, and carriage return.
      * @return a single {@link Token}.
      */
-    public static Token singleToken(Vocabulary vocabulary, String input, String escape) {
+    public static Token singleToken(String input, String escape, Vocabulary vocabulary) {
         Matcher matcher = PATTERN.matcher(input);
         if (matcher.matches()) {
             String text = replaceEscaped(matcher.group(4), escape);

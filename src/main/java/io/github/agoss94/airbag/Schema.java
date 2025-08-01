@@ -13,62 +13,56 @@ import org.antlr.v4.runtime.Token;
 public sealed interface Schema permits Schema.Rule, Schema.Terminal, Schema.Error {
 
     /**
-     * Returns the name of the node.
+     * Returns the index of the node.
      * <p>
-     * For a non-terminal node, this is the parser rule name (e.g., "stat", "expr").
-     * For a terminal node, this is the token type name (e.g., "ID", "INT", "'+'").
-     * For an error node, this is the special marker "&lt;error&gt;".
+     * For a non-terminal node, this is the parser rule index.
+     * For a terminal node, this is the token type.
+     * For an error node, this is the token type of the erroneous token.
      *
-     * @return the name of the parser rule, token type, or error marker.
+     * @return the index of the parser rule or token type.
      */
-    String name();
+    int index();
 
     /**
      * Returns the parent of this node in the validation tree.
+     * <p>
+     * The root of the tree has itself as a parent.
      *
-     * @return the parent {@code Schema} node, or {@code null} if this is the root of the tree.
+     * @return the parent {@code Schema} node.
      */
     Schema getParent();
 
 
     /**
-     * Converts the validation tree to an S-expression representation.
-     * S-expressions are a Lisp-style notation for nested list data, which in this case represents the parse tree.
-     * This provides a human-readable format for visualizing the structure of the validation tree, similar to
-     * formats used by tools like TreeSitter.
+     * Converts the Schema tree to an S-expression representation.
+     * S-expressions provide a human-readable format for visualizing the nested structure of the tree.
      * <p>
-     * For example, given the following ANTLR grammar for expressions:
-     * <pre>{@code
-     * stat: expr NEWLINE
-     *     | ID '=' expr NEWLINE
-     *     ;
-     *
-     * expr: expr ('*'|'/') expr
-     *     | expr ('+'|'-') expr
-     *     | INT
-     *     | ID
-     *     ;
-     * }</pre>
-     * An input like {@code x = 1 + 2} followed by a newline would be parsed into a tree.
-     * This method would then produce the following S-expression for the {@code stat} rule:
-     * <pre>{@code
-     * (stat (ID 'x') '=' (expr (expr (INT '1')) '+' (expr (INT '2'))) (NEWLINE '\n'))
-     * }</pre>
-     * In this representation:
+     * The format is as follows:
      * <ul>
-     *     <li>{@code stat}, {@code expr} are parser rule names (non-terminals).</li>
-     *     <li>{@code (ID 'x')}, {@code '='}, {@code (INT '1')}, {@code '+'}, {@code (INT '2')}, {@code (NEWLINE '\n')} are terminal tokens.
-     *         A token is represented as {@code (TOKEN_TYPE 'value')} or as a literal string for fixed tokens like {@code '='}.</li>
+     *     <li>A <b>rule node</b> is represented as {@code (INDEX CHILD_1 CHILD_2 ...)}, where {@code INDEX} is the rule index.</li>
+     *     <li>A <b>terminal node</b> is represented as {@code (INDEX 'text')}, where {@code INDEX} is the token type and {@code 'text'} is the token's text.</li>
+     *     <li>An <b>error node</b> is represented as {@code (<error> (INDEX 'text'))}, indicating a syntax error.</li>
      * </ul>
      *
-     * <h4>Error Handling</h4>
-     * If the parser encounters a syntax error, it will be represented by an {@code <error>} node.
-     * For example, the invalid input {@code 5 * / 6} would produce an S-expression like this:
+     * <h4>Example</h4>
+     * For example, given the following ANTLR grammar:
      * <pre>{@code
-     * (expr (expr (INT '5')) '*' (<error> (DIV '/')) (expr (INT '6')))
+     * grammar Expression;
+     * stat : expr NEWLINE | ID '=' expr NEWLINE | NEWLINE;
+     * expr : INT | ID;
+     * ID: [a-zA-Z]+;
+     * INT: [0-9]+;
+     * NEWLINE: '\r'?'\n';
+     * WS: [ \t]+ -> skip;
+     * // Assuming token types: '='=1, ID=8, INT=9
+     * // Assuming rule indices: stat=1, expr=2
+     * }</pre>
+     * An input like {@code x = 1} would be parsed into a tree, producing the following S-expression:
+     * <pre>{@code
+     * (1 (8 'x') (1 '=') (2 (9 '1')))
      * }</pre>
      *
-     * @return a string representing the tree in S-expression format.
+     * @return a string representing the schema in S-expression format.
      */
     String toString();
 
@@ -78,7 +72,6 @@ public sealed interface Schema permits Schema.Rule, Schema.Terminal, Schema.Erro
      * This corresponds to a {@code RuleNode} in the ANTLR parse tree. It serves as an internal node
      * in the schema tree and has children that are other rules or terminals.
      */
-
     non-sealed interface Rule extends Schema {
 
         /**
@@ -117,13 +110,13 @@ public sealed interface Schema permits Schema.Rule, Schema.Terminal, Schema.Erro
         Token token();
 
         /**
-         * Return {@code true} if the terminal node is a literal, indicating that {@link Schema#name()}
-         * is {@code null}
-         *
-         * @return {@code true} if the terminal node is a literal
+         * Returns the token type of the underlying token.
+         * @return the token type.
          */
-        boolean isLiteral();
-
+        @Override
+        default int index() {
+            return token().getType();
+        }
     }
 
     /**
@@ -141,5 +134,13 @@ public sealed interface Schema permits Schema.Rule, Schema.Terminal, Schema.Erro
          */
         Token token();
 
+        /**
+         * Returns the token type of the underlying error token.
+         * @return the token type.
+         */
+        @Override
+        default int index() {
+            return token().getType();
+        }
     }
 }
