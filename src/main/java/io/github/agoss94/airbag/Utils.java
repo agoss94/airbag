@@ -1,4 +1,4 @@
-package io.github.agoss94.airbag.core;
+package io.github.agoss94.airbag;
 
 import java.util.List;
 import java.util.function.BiPredicate;

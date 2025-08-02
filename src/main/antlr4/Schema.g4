@@ -1,6 +1,8 @@
 grammar Schema;
 
-schema: node EOF;
+schema
+    : node EOF
+    ;
 
 node
     : rule
@@ -11,10 +13,12 @@ node
 rule
     : '(' index = (INT | RULE) node+ ')'
     ;
+
 token
     : '(' index = (INT | TOKEN) STRING ')' #symbolic
     | STRING #literal
     ;
+
 error
     : '(' ERROR token ')'
     ;

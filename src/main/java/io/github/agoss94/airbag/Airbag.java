@@ -3,7 +3,6 @@ package io.github.agoss94.airbag;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
-import io.github.agoss94.airbag.core.Utils;
 import org.antlr.v4.runtime.*;
 
 import java.util.List;
