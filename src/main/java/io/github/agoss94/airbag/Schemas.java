@@ -60,6 +60,14 @@ public class Schemas {
         return "(%s '%s')".formatted(vocabulary.getDisplayName(token.getType()), token.getText());
     }
 
+    /**
+     * Parses a string in S-expression format to a {@link Schema} tree.
+     * This method is the inverse of {@link #toString(Schema, Parser)}.
+     *
+     * @param string the S-expression string to parse.
+     * @param parser the ANTLR {@link Parser} used to resolve rule and token names.
+     * @return the parsed {@link Schema} tree.
+     */
     public static Schema from(String string, Parser parser) {
         var schemaLexer = new SchemaLexer(CharStreams.fromString(string));
         var schemaParser = new SchemaParser(new CommonTokenStream(schemaLexer));
@@ -70,31 +78,66 @@ public class Schemas {
         return listener.schema;
     }
 
+    /**
+     * Listener for walking the parse tree of a schema S-expression and building a {@link Schema} tree.
+     */
     private static class Listener extends SchemaBaseListener {
 
+        /**
+         * The {@link Schema} tree being built.
+         */
         private Schema schema;
+        /**
+         * The ANTLR {@link Parser} used to resolve rule and token names.
+         */
         private Parser parser;
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * When entering a rule, a new {@link Schema.Rule} is created and becomes the current schema node.
+         */
         @Override
         public void enterRule(SchemaParser.RuleContext ctx) {
-            schema = new SchemaNode.Rule(getRuleIndex(ctx.index, parser), schema);
+            schema = SchemaNode.Rule.attach(getRuleIndex(ctx.index, parser), schema);
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * When exiting a rule, the parent of the current schema node becomes the new current schema node.
+         */
         @Override
         public void exitRule(SchemaParser.RuleContext ctx) {
             schema = schema.getParent();
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * When entering a literal, a new {@link Schema.Terminal} is created.
+         */
         @Override
         public void enterLiteral(SchemaParser.LiteralContext ctx) {
-            new SchemaNode.Terminal(createToken(ctx), schema);
+            SchemaNode.Terminal.attach(createToken(ctx), schema);
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * When entering a symbolic token, a new {@link Schema.Terminal} is created.
+         */
         @Override
         public void enterSymbolic(SchemaParser.SymbolicContext ctx) {
-            new SchemaNode.Terminal(createToken(ctx), schema);
+            SchemaNode.Terminal.attach(createToken(ctx), schema);
         }
 
+        /**
+         * Creates a {@link Token} from a token context.
+         *
+         * @param ctx the token context.
+         * @return the created {@link Token}.
+         */
         private Token createToken(SchemaParser.TokenContext ctx) {
             if (ctx instanceof SchemaParser.LiteralContext literalCtx) {
                 var literal = literalCtx.STRING().getText();
@@ -109,11 +152,24 @@ public class Schemas {
             }
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * When entering an error node, a new {@link Schema.Error} is created.
+         */
         @Override
         public void enterError(SchemaParser.ErrorContext ctx) {
-            new SchemaNode.Error(createToken(ctx.token()), schema);
+            SchemaNode.Error.attach(createToken(ctx.token()), schema);
         }
 
+        /**
+         * Gets the rule index from a token.
+         * The token can be a rule name or a rule index.
+         *
+         * @param token  the token containing the rule name or index.
+         * @param parser the ANTLR {@link Parser} used to resolve rule names.
+         * @return the rule index.
+         */
         private int getRuleIndex(Token token, Parser parser) {
             String index = token.getText();
             if (index.matches("-?\\d+")) {
@@ -123,6 +179,13 @@ public class Schemas {
             }
         }
 
+        /**
+         * Gets the token type from a token.
+         * The token can be a token name or a token type.
+         *
+         * @param token the token containing the token name or type.
+         * @return the token type.
+         */
         private int getTokenIndex(Token token) {
             String index = token.getText();
             if (index.matches("-?\\d+")) {
@@ -133,3 +196,4 @@ public class Schemas {
         }
     }
 }
+

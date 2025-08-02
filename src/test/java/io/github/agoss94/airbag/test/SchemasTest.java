@@ -22,16 +22,18 @@ class SchemasTest {
         ExpressionParser parser = new ExpressionParser(null);
 
         // Manually construct a schema tree
-        Schema.Rule root = new SchemaNode.Rule(ExpressionParser.RULE_stat, null);
-        new SchemaNode.Terminal(new CommonToken(ExpressionLexer.ID, "x"), root);
-        new SchemaNode.Terminal(new CommonToken(ExpressionLexer.T__0, "="), root);
-        Schema.Rule expr = new SchemaNode.Rule(ExpressionParser.RULE_expr, root);
-        new SchemaNode.Terminal(new CommonToken(ExpressionLexer.INT, "1"), expr);
+        Schema.Rule root = SchemaNode.Rule.attach(ExpressionParser.RULE_stat, null);
+        Schema.Terminal child = SchemaNode.Terminal.attach(new CommonToken(ExpressionLexer.ID, "x"),
+                root);
+        SchemaNode.Terminal.attach(new CommonToken(ExpressionLexer.T__0, "="), root);
+        Schema.Rule expr = SchemaNode.Rule.attach(ExpressionParser.RULE_expr, root);
+        SchemaNode.Terminal.attach(new CommonToken(ExpressionLexer.INT, "1"), expr);
 
         // Convert the schema to a string using the parser
         String result = Schemas.toString(root, parser);
 
         // Assert the expected S-expression
+        assertEquals(child, root.getChild(0));
         assertEquals("(stat (ID 'x') '=' (expr (INT '1')))", result);
     }
 

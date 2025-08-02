@@ -88,9 +88,21 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
          * @param index  the index of the node.
          * @param parent the parent of the node.
          */
-        public Rule(int index, Schema parent) {
+        private Rule(int index, Schema parent) {
             super(index, parent);
             children = new ArrayList<>();
+        }
+
+        /**
+         * Creating and attaching a {@link Schema.Rule } node to the given parent. The created
+         * node is returned.
+         *
+         * @param index  the index of the rule.
+         * @param parent the given parent.
+         * @return the newly created node.
+         */
+        public static Schema.Rule attach(int index, Schema parent) {
+            return new SchemaNode.Rule(index, parent);
         }
 
         /**
@@ -126,9 +138,21 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
          * @param token  the ANTLR token.
          * @param parent the parent of the node.
          */
-        public Terminal(Token token, Schema parent) {
+        private Terminal(Token token, Schema parent) {
             super(token.getType(), parent);
             this.token = token;
+        }
+
+        /**
+         * Creating and attaching a {@link Schema.Terminal } node to the given parent. The created
+         * node is returned.
+         *
+         * @param token  the token which is the payload of the schema.
+         * @param parent the given parent.
+         * @return the newly created node.
+         */
+        public static Schema.Terminal attach(Token token, Schema parent) {
+            return new SchemaNode.Terminal(token, parent);
         }
 
         /**
@@ -157,9 +181,21 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
          * @param token  the ANTLR token.
          * @param parent the parent of the node.
          */
-        public Error(Token token, Schema parent) {
+        private Error(Token token, Schema parent) {
             super(token.getType(), parent);
             this.token = token;
+        }
+
+        /**
+         * Creating and attaching a {@link Schema.Error } node to the given parent. The created
+         * node is returned.
+         *
+         * @param token  the token which is the payload of the schema.
+         * @param parent the given parent.
+         * @return the newly created node.
+         */
+        public static Schema.Error attach(Token token, Schema parent) {
+            return new SchemaNode.Error(token, parent);
         }
 
         /**
