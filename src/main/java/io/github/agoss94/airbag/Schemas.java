@@ -119,7 +119,12 @@ public class Schemas {
          */
         @Override
         public void enterLiteral(SchemaParser.LiteralContext ctx) {
-            SchemaNode.Terminal.attach(createToken(ctx), schema);
+            schema = SchemaNode.Terminal.attach(createToken(ctx), schema);
+        }
+
+        @Override
+        public void exitLiteral(SchemaParser.LiteralContext ctx) {
+            schema = schema.getParent();
         }
 
         /**
@@ -129,7 +134,12 @@ public class Schemas {
          */
         @Override
         public void enterSymbolic(SchemaParser.SymbolicContext ctx) {
-            SchemaNode.Terminal.attach(createToken(ctx), schema);
+            schema = SchemaNode.Terminal.attach(createToken(ctx), schema);
+        }
+
+        @Override
+        public void exitSymbolic(SchemaParser.SymbolicContext ctx) {
+            schema = schema.getParent();
         }
 
         /**
@@ -159,7 +169,12 @@ public class Schemas {
          */
         @Override
         public void enterError(SchemaParser.ErrorContext ctx) {
-            SchemaNode.Error.attach(createToken(ctx.token()), schema);
+            schema = SchemaNode.Error.attach(createToken(ctx.token()), schema);
+        }
+
+        @Override
+        public void exitError(SchemaParser.ErrorContext ctx) {
+            schema = schema.getParent();
         }
 
         /**
