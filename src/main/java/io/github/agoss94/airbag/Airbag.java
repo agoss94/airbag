@@ -105,80 +105,24 @@ public class Airbag {
      * @throws AssertionError if the parse tree does not conform to the schema.
      */
     public void assertSchema(Schema expected, ParseTree tree) {
-        switch (expected) {
-            case Schema.Rule rule -> {
-                if (tree instanceof RuleContext ruleContext) {
-                    assertRuleNode(rule, ruleContext);
-                } else {
-                    throw new AssertionError(
-                            "Expected rule node with index %d but instead was given the terminal node.".formatted(
-                                    rule.index()));
-                }
-            }
-            case Schema.Terminal terminal -> {
-                if (tree instanceof ErrorNode) {
-                    throw new AssertionError("Expected a terminal node but was given an error node");
-                } else {
-                    assertWeakToken(terminal.token(), (Token) tree.getPayload());
-                }
-            }
-            case Schema.Error error -> {
-                if (tree instanceof ErrorNode) {
-                    assertWeakToken(error.token(), (Token) tree.getPayload());
-                } else {
-                    throw new AssertionError("Expected a error node but was given an terminal node");
-                }
-            }
+        Schema actual = Schemas.from(tree);
+        if (!expected.equals(actual)) {
+            throw new AssertionError("Schemas are not equal.\nExpected: %s\nActual:   %s".formatted(
+                    Schemas.toString(expected, (Parser) getRecognizer()),
+                    Schemas.toString(actual, (Parser) getRecognizer())));
         }
     }
 
     /**
-     * Asserts that the given {@link RuleContext} conforms to the {@link Schema.Rule}.
+     * Returns the ANTLR recognizer.
      *
-     * @param ruleNode the expected rule schema.
-     * @param ctx the rule context.
-     * @throws AssertionError if the rule context does not conform to the rule schema.
+     * @return the ANTLR recognizer.
      */
-    private void assertRuleNode(Schema.Rule ruleNode, RuleContext ctx) {
-        int expectedIndex = ruleNode.index();
-        int actualIndex = ctx.getRuleIndex();
-        if (expectedIndex != actualIndex) {
-            throw new AssertionError("Expected the rule index %s, but instead was %d".formatted(
-                    expectedIndex,
-                    actualIndex));
-        } else {
-            int expectedCount = ruleNode.getChildCount();
-            int actualCount = ctx.getChildCount();
-            for (int i = 0; i < Math.max(expectedCount, actualCount); i++) {
-                if (!(i < expectedCount)) {
-                    throw new AssertionError("The rule node %d has more children than expected".formatted(
-                            actualIndex));
-                } else if (!(i < actualCount)) {
-                    throw new AssertionError("The rule node %d has less children than expected".formatted(
-                            actualIndex));
-                } else {
-                    assertSchema(ruleNode.getChild(i), ctx.getChild(i));
-                }
-            }
-        }
-    }
-
-    /**
-     * Asserts that two tokens are weakly equal.
-     * <p>
-     * Two tokens are weakly equal if they have the same type and text. Other properties like channel, line, and char
-     * position in line are ignored.
-     *
-     * @param expected the expected token.
-     * @param actual the actual token.
-     * @throws AssertionError if the tokens are not weakly equal.
-     */
-    private void assertWeakToken(Token expected, Token actual) {
-        if (expected.getType() != actual.getType() ||
-                !Objects.equals(expected.getText(), actual.getText())) {
-            throw new AssertionError("Tokens are not equal.%nExpected: %s%nActual:   %s".formatted(
-                    Tokens.toString(expected, getVocabulary()),
-                    Tokens.toString(actual, getVocabulary())));
+    private Recognizer<?, ?> getRecognizer() {
+        try {
+            return recognizerClass.getConstructor(TokenStream.class).newInstance((TokenStream) null);
+        } catch (Exception e) {
+            return null;
         }
     }
 

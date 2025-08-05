@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.CommonToken;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -74,5 +75,63 @@ class SchemaNodeTest {
         var root = SchemaNode.Rule.attach(0, null);
         var error = SchemaNode.Error.attach(new CommonToken(1, "unexpected"), root);
         assertThrows(IllegalArgumentException.class, () -> SchemaNode.Rule.attach(2, error));
+    }
+
+    @Test
+    void testRuleEquals() {
+        var root1 = SchemaNode.Rule.attach(0, null);
+        SchemaNode.Terminal.attach(new CommonToken(1, "a"), root1);
+        SchemaNode.Terminal.attach(new CommonToken(2, "b"), root1);
+
+        var root2 = SchemaNode.Rule.attach(0, null);
+        SchemaNode.Terminal.attach(new CommonToken(1, "a"), root2);
+        SchemaNode.Terminal.attach(new CommonToken(2, "b"), root2);
+
+        assertEquals(root1, root2);
+    }
+
+    @Test
+    void testRuleNotEquals() {
+        var root1 = SchemaNode.Rule.attach(0, null);
+        SchemaNode.Terminal.attach(new CommonToken(1, "a"), root1);
+        SchemaNode.Terminal.attach(new CommonToken(2, "b"), root1);
+
+        var root2 = SchemaNode.Rule.attach(0, null);
+        SchemaNode.Terminal.attach(new CommonToken(1, "a"), root2);
+        SchemaNode.Terminal.attach(new CommonToken(2, "c"), root2);
+
+        assertNotEquals(root1, root2);
+    }
+
+    @Test
+    void testTerminalEquals() {
+        var terminal1 = SchemaNode.Terminal.attach(new CommonToken(1, "a"), null);
+        var terminal2 = SchemaNode.Terminal.attach(new CommonToken(1, "a"), null);
+
+        assertEquals(terminal1, terminal2);
+    }
+
+    @Test
+    void testTerminalNotEquals() {
+        var terminal1 = SchemaNode.Terminal.attach(new CommonToken(1, "a"), null);
+        var terminal2 = SchemaNode.Terminal.attach(new CommonToken(1, "b"), null);
+
+        assertNotEquals(terminal1, terminal2);
+    }
+
+    @Test
+    void testErrorEquals() {
+        var error1 = SchemaNode.Error.attach(new CommonToken(1, "unexpected"), null);
+        var error2 = SchemaNode.Error.attach(new CommonToken(1, "unexpected"), null);
+
+        assertEquals(error1, error2);
+    }
+
+    @Test
+    void testErrorNotEquals() {
+        var error1 = SchemaNode.Error.attach(new CommonToken(1, "unexpected"), null);
+        var error2 = SchemaNode.Error.attach(new CommonToken(1, "different"), null);
+
+        assertNotEquals(error1, error2);
     }
 }

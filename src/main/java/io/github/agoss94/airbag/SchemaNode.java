@@ -122,6 +122,9 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
             return children.size();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean equals(Object o) {
             if (o instanceof Schema.Rule ruleNode) {
@@ -143,6 +146,9 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public int hashCode() {
             return Objects.hash(index(), children);

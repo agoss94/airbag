@@ -24,7 +24,7 @@ public class SchemaAssertionTest {
 
     @BeforeEach
     void setUp() {
-        airbag = new Airbag(ExpressionLexer.class);
+        airbag = new Airbag(ExpressionParser.class);
     }
 
     private ParseTree parse(String expression) {
@@ -48,7 +48,7 @@ public class SchemaAssertionTest {
         var tree = parse("1\n").getChild(0).getChild(0);
         Assertions.assertInstanceOf(TerminalNode.class, tree);
         var exception = assertThrows(AssertionError.class, () -> airbag.assertSchema(schema, tree));
-        Assertions.assertEquals("Expected rule node with index 1 but instead was given the terminal node.", exception.getMessage());
+        Assertions.assertEquals("Schemas are not equal.\nExpected: (stat)\nActual:   (INT '1')", exception.getMessage());
     }
 
     @Test
@@ -57,14 +57,14 @@ public class SchemaAssertionTest {
         var schema = SchemaNode.Terminal.attach(token, null);
         var errorNode = new ErrorNodeImpl(new CommonToken(Token.INVALID_TYPE, "<error>"));
         var exception = assertThrows(AssertionError.class, () -> airbag.assertSchema(schema, errorNode));
-        Assertions.assertEquals("Expected a terminal node but was given an error node", exception.getMessage());
+        Assertions.assertEquals("Schemas are not equal.\nExpected: (INT '1')\nActual:   (<error> (0 '<error>'))", exception.getMessage());
     }
 
     @Test
     void assertSchema_withMatchingTerminal_shouldSucceed() {
         var parser = new ExpressionParser(null);
-        var schema = Schemas.from("(INT '1')", parser);
-        var tree = parse("1\n").getChild(0).getChild(0);
+        var schema = Schemas.from("(expr (INT '1'))", parser);
+        var tree = parse("1\n").getChild(0);
         airbag.assertSchema(schema, tree);
     }
 
@@ -82,7 +82,7 @@ public class SchemaAssertionTest {
         var schema = SchemaNode.Error.attach(errorToken, null);
         var tree = parse("1\n").getChild(0).getChild(0);
         var exception = assertThrows(AssertionError.class, () -> airbag.assertSchema(schema, tree));
-        Assertions.assertEquals("Expected a error node but was given an terminal node", exception.getMessage());
+        Assertions.assertEquals("Schemas are not equal.\nExpected: (<error> (0 '!'))\nActual:   (INT '1')", exception.getMessage());
     }
 
     @Test
@@ -90,16 +90,20 @@ public class SchemaAssertionTest {
         var schema = SchemaNode.Rule.attach(ExpressionParser.RULE_expr, null);
         var tree = parse("1\n");
         var exception = assertThrows(AssertionError.class, () -> airbag.assertSchema(schema, tree));
-        Assertions.assertEquals("Expected the rule index 2, but instead was 1", exception.getMessage());
+        Assertions.assertEquals("Schemas are not equal.\nExpected: (expr)\nActual:   (stat (expr (INT '1')) (NEWLINE '%n'))", exception.getMessage());
     }
 
     @Test
     void assertSchema_withTooFewChildren_shouldThrowAssertionError() {
         var parser = new ExpressionParser(null);
-        var schema = Schemas.from("(stat (expr (INT '1')) (NEWLINE '\n') (EOF '<EOF>') (EOF '<EOF>'))", parser);
+        var schema = Schemas.from("(stat (expr (INT '1')) (NEWLINE '\n') (EOF '<EOF>'))", parser);
         var tree = parse("1\n");
         var exception = assertThrows(AssertionError.class, () -> airbag.assertSchema(schema, tree));
-        Assertions.assertEquals("The rule node 1 has less children than expected", exception.getMessage());
+        var expectedMessage = """
+                Schemas are not equal.
+                Expected: (stat (expr (INT '1')) (NEWLINE '%n') (EOF '<EOF>'))
+                Actual:   (stat (expr (INT '1')) (NEWLINE '%n'))""";
+        Assertions.assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
@@ -108,7 +112,7 @@ public class SchemaAssertionTest {
         var schema = Schemas.from("(stat (expr (INT '1')))", parser);
         var tree = parse("1\n");
         var exception = assertThrows(AssertionError.class, () -> airbag.assertSchema(schema, tree));
-        Assertions.assertEquals("The rule node 1 has more children than expected", exception.getMessage());
+        Assertions.assertEquals("Schemas are not equal.\nExpected: (stat (expr (INT '1')))\nActual:   (stat (expr (INT '1')) (NEWLINE '%n'))", exception.getMessage());
     }
 
     @Test
@@ -117,7 +121,7 @@ public class SchemaAssertionTest {
         var schema = Schemas.from("(ID '1')", parser);
         var tree = parse("1\n").getChild(0).getChild(0);
         var exception = assertThrows(AssertionError.class, () -> airbag.assertSchema(schema, tree));
-        Assertions.assertTrue(exception.getMessage().startsWith("Tokens are not equal."));
+        Assertions.assertEquals("Schemas are not equal.\nExpected: (ID '1')\nActual:   (INT '1')", exception.getMessage());
     }
 
     @Test
@@ -126,6 +130,6 @@ public class SchemaAssertionTest {
         var schema = Schemas.from("(INT '2')", parser);
         var tree = parse("1\n").getChild(0).getChild(0);
         var exception = assertThrows(AssertionError.class, () -> airbag.assertSchema(schema, tree));
-        Assertions.assertTrue(exception.getMessage().startsWith("Tokens are not equal."));
+        Assertions.assertEquals("Schemas are not equal.\nExpected: (INT '2')\nActual:   (INT '1')", exception.getMessage());
     }
 }
