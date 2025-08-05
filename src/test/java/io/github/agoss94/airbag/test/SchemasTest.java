@@ -6,6 +6,9 @@ import io.github.agoss94.airbag.Schemas;
 import io.github.agoss94.airbag.grammar.ExpressionLexer;
 import io.github.agoss94.airbag.grammar.ExpressionParser;
 import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,5 +107,25 @@ class SchemasTest {
         assertEquals("1", resultIntTerminal.token().getText());
 
         assertEquals(schemaString, Schemas.toString(resultRootRule, parser));
+    }
+
+    @Test
+    void testFromParseTree() {
+        String input = "x = 1\n";
+        ExpressionLexer lexer = new ExpressionLexer(CharStreams.fromString(input));
+        ExpressionParser parser = new ExpressionParser(new CommonTokenStream(lexer));
+        ParseTree tree = parser.stat();
+
+        // Manually construct the expected schema tree
+        Schema.Rule expected = SchemaNode.Rule.attach(ExpressionParser.RULE_stat, null);
+        SchemaNode.Terminal.attach(new CommonToken(ExpressionLexer.ID, "x"), expected);
+        SchemaNode.Terminal.attach(new CommonToken(ExpressionLexer.T__0, "="), expected);
+        Schema.Rule expr = SchemaNode.Rule.attach(ExpressionParser.RULE_expr, expected);
+        SchemaNode.Terminal.attach(new CommonToken(ExpressionLexer.INT, "1"), expr);
+        SchemaNode.Terminal.attach(new CommonToken(ExpressionLexer.NEWLINE, "%n".formatted()), expected);
+
+        Schema actual = Schemas.from(tree);
+
+        assertEquals(expected, actual);
     }
 }

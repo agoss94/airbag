@@ -26,7 +26,7 @@ class TokenAssertionTest {
 
     @BeforeEach
     void setUp() {
-        airbag = new Airbag(ExpressionLexer.VOCABULARY);
+        airbag = new Airbag(ExpressionLexer.class);
     }
 
     @Test

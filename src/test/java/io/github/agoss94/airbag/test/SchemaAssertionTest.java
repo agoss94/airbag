@@ -24,7 +24,7 @@ public class SchemaAssertionTest {
 
     @BeforeEach
     void setUp() {
-        airbag = new Airbag(ExpressionLexer.VOCABULARY);
+        airbag = new Airbag(ExpressionLexer.class);
     }
 
     private ParseTree parse(String expression) {

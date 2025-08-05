@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The {@code SchemaNode} class is a concrete implementation of the {@link Schema} interface.
@@ -120,6 +121,32 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
         public int getChildCount() {
             return children.size();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof Schema.Rule ruleNode) {
+                if (index() != ruleNode.index()) {
+                    return false;
+                } else {
+                    int thisChildCount = getChildCount();
+                    int thatChildCount = ruleNode.getChildCount();
+                    for (int i = 0; i < Math.max(thisChildCount, thatChildCount); i++) {
+                        if (!Objects.equals(i < thisChildCount ? getChild(i) : null,
+                                i < thatChildCount ? ruleNode.getChild(i) : null)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(index(), children);
+        }
     }
 
     /**
@@ -163,6 +190,29 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
             return token;
         }
 
+        /**
+         * Return {@code true} if the two nodes share the same index and text.
+         *
+         * @param o the other node.
+         * @return {@code true} if the two nodes share the same index and text.
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof Schema.Terminal terminalNode) {
+                return index() == terminalNode.index() &&
+                        token().getText().equals(terminalNode.token().getText());
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int hashCode() {
+            return Objects.hash(index(), token().getText());
+        }
     }
 
     /**
@@ -204,6 +254,30 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
         @Override
         public Token token() {
             return token;
+        }
+
+        /**
+         * Return {@code true} if the two nodes share the same index and text.
+         *
+         * @param o the other node.
+         * @return {@code true} if the two nodes share the same index and text.
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof Schema.Error errorNode) {
+                return index() == errorNode.index() &&
+                        token().getText().equals(errorNode.token().getText());
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int hashCode() {
+            return Objects.hash(index(), token().getText());
         }
     }
 }

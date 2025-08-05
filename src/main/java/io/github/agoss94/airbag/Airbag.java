@@ -22,6 +22,7 @@ public class Airbag {
      * The ANTLR vocabulary.
      */
     private Vocabulary vocabulary;
+    private Class<? extends Recognizer<?, ?>> recognizerClass;
 
     /**
      * Constructs a new Airbag.
@@ -32,10 +33,10 @@ public class Airbag {
     /**
      * Constructs a new Airbag with the given vocabulary.
      *
-     * @param vocabulary the ANTLR vocabulary.
+     * @param recognizerClass the recognizer class.
      */
-    public Airbag(Vocabulary vocabulary) {
-        this.vocabulary = vocabulary;
+    public Airbag(Class<? extends Recognizer<?,?>> recognizerClass) {
+        setRecognizerClass(recognizerClass);
     }
 
     /**
@@ -47,8 +48,8 @@ public class Airbag {
     public void assertToken(Token expected, Token actual) {
         if (!Tokens.isEqual(expected, actual)) {
             throw new AssertionError("Tokens are not equal.%nExpected: %s%nActual:   %s".formatted(
-                    Tokens.toString(expected, vocabulary),
-                    Tokens.toString(actual, vocabulary)));
+                    Tokens.toString(expected, getVocabulary()),
+                    Tokens.toString(actual, getVocabulary())));
         }
     }
 
@@ -61,11 +62,13 @@ public class Airbag {
     public void assertTokenList(List<? extends Token> expected, List<? extends Token> actual) {
         if (!Utils.listEquals(expected, actual, Tokens::isEqual)) {
             int width = Stream.concat(expected.stream(), actual.stream())
-                    .map(token -> Tokens.toString(token, vocabulary).length())
+                    .map(token -> Tokens.toString(token, getVocabulary()).length())
                     .max(Integer::compareTo)
                     .orElse(0);
 
-            Patch<Token> patch = DiffUtils.diff(expected, actual, Tokens::isEqual);
+            List<Token> expectedList = expected.stream().map(t -> (Token) t).toList();
+            List<Token> actualList = actual.stream().map(t -> (Token) t).toList();
+            Patch<Token> patch = DiffUtils.diff(expectedList, actualList, Tokens::isEqual);
             String tokenSlot = "%%-%ds".formatted(width);
             StringBuilder diffMessage = new StringBuilder("Token lists are not equal.%n%n".formatted());
             diffMessage.append("%s | %s%n".formatted(tokenSlot.formatted("Expected"),
@@ -78,10 +81,10 @@ public class Airbag {
                 int targetSize = targetLines.size();
                 for (int i = 0; i < Math.max(sourceSize, targetSize); i++) {
                     String source = i < sourceSize ?
-                            Tokens.toString(sourceLines.get(i), vocabulary) :
+                            Tokens.toString(sourceLines.get(i), getVocabulary()) :
                             "";
                     String target = i < targetSize ?
-                            Tokens.toString(targetLines.get(i), vocabulary) :
+                            Tokens.toString(targetLines.get(i), getVocabulary()) :
                             "";
                     diffMessage.append("%s | %s%n".formatted(tokenSlot.formatted(source),
                             tokenSlot.formatted(target)));
@@ -89,7 +92,7 @@ public class Airbag {
             }
             diffMessage.append("%n%nActual:%n-------%n%n".formatted());
             actual.forEach(t -> diffMessage.append("%s%n".formatted(Tokens.toString(t,
-                    vocabulary))));
+                    getVocabulary()))));
             throw new AssertionError(diffMessage.toString());
         }
     }
@@ -174,8 +177,8 @@ public class Airbag {
         if (expected.getType() != actual.getType() ||
                 !Objects.equals(expected.getText(), actual.getText())) {
             throw new AssertionError("Tokens are not equal.%nExpected: %s%nActual:   %s".formatted(
-                    Tokens.toString(expected, vocabulary),
-                    Tokens.toString(actual, vocabulary)));
+                    Tokens.toString(expected, getVocabulary()),
+                    Tokens.toString(actual, getVocabulary())));
         }
     }
 
@@ -188,12 +191,16 @@ public class Airbag {
         return vocabulary;
     }
 
-    /**
-     * Sets the ANTLR vocabulary.
-     *
-     * @param vocabulary the ANTLR vocabulary.
-     */
-    public void setVocabulary(Vocabulary vocabulary) {
-        this.vocabulary = vocabulary;
+    public Class<? extends Recognizer<?, ?>> getRecognizerClass() {
+        return recognizerClass;
+    }
+
+    public void setRecognizerClass(Class<? extends Recognizer<?, ?>> recognizerClass) {
+        this.recognizerClass = recognizerClass;
+        try {
+            this.vocabulary = (Vocabulary) recognizerClass.getField("VOCABULARY").get(null);
+        }  catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -4,7 +4,7 @@ import io.github.agoss94.airbag.parser.SchemaBaseListener;
 import io.github.agoss94.airbag.parser.SchemaLexer;
 import io.github.agoss94.airbag.parser.SchemaParser;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.*;
 
 /**
  * Utility class for working with ANTLR schemas.
@@ -51,13 +51,13 @@ public class Schemas {
      */
     private static String tokenToString(Token token, Vocabulary vocabulary) {
         if (vocabulary == null) {
-            return "(%s '%s')".formatted(String.valueOf(token.getType()), token.getText());
+            return "(%s '%s')".formatted(String.valueOf(token.getType()), Utils.escape(token.getText(), "%"));
         }
         String literalName = vocabulary.getLiteralName(token.getType());
         if (literalName != null) {
-            return "'%s'".formatted(token.getText());
+            return "'%s'".formatted(Utils.escape(token.getText(), "%"));
         }
-        return "(%s '%s')".formatted(vocabulary.getDisplayName(token.getType()), token.getText());
+        return "(%s '%s')".formatted(vocabulary.getDisplayName(token.getType()), Utils.escape(token.getText(), "%"));
     }
 
     /**
@@ -76,6 +76,43 @@ public class Schemas {
         var walker = new ParseTreeWalker();
         walker.walk(listener, schemaParser.schema());
         return listener.schema;
+    }
+
+    /**
+     * Converts a {@link ParseTree} to a {@link Schema} tree.
+     *
+     * @param tree the parse tree to convert.
+     * @return the converted {@link Schema} tree.
+     */
+    public static Schema from(ParseTree tree) {
+        return from(tree, null);
+    }
+
+    /**
+     * Converts a {@link ParseTree} to a {@link Schema} tree and attaches it to the given parent.
+     *
+     * @param tree   the parse tree to convert.
+     * @param parent the parent to attach the converted schema to.
+     * @return the converted {@link Schema} tree.
+     */
+    private static Schema from(ParseTree tree, Schema parent) {
+        switch (tree) {
+            case RuleNode ruleNode -> {
+                Schema.Rule rule = SchemaNode.Rule.attach(ruleNode.getRuleContext().getRuleIndex(),
+                        parent);
+                for (int i = 0; i < ruleNode.getChildCount(); i++) {
+                    from(ruleNode.getChild(i), rule);
+                }
+                return rule;
+            }
+            case ErrorNode errorNode -> {
+                return SchemaNode.Error.attach(errorNode.getSymbol(), parent);
+            }
+            case TerminalNode terminalNode -> {
+                return SchemaNode.Terminal.attach(terminalNode.getSymbol(), parent);
+            }
+            case null, default -> throw new RuntimeException("Unrecognized node");
+        }
     }
 
     /**

@@ -184,13 +184,7 @@ public final class Tokens {
             channelStr = ",channel=" + t.getChannel();
         }
         String txt = t.getText();
-        if (txt != null) {
-            txt = txt.replace("\n", "%sn".formatted(escape));
-            txt = txt.replace("\r", "%sr".formatted(escape));
-            txt = txt.replace("\t", "%st".formatted(escape));
-        } else {
-            txt = "<no text>";
-        }
+        txt = Utils.escape(txt, escape);
         int type = t.getType();
         String typeString = String.valueOf(type);
         if (voc != null) {
