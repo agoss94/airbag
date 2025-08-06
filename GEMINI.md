@@ -39,3 +39,9 @@ documentation.
 - `src/main/antlr4/`: Contains the ANTLR grammars for the project.
 - `src/test/java/`: Contains the unit tests.
 - `src/test/antlr4/`: Contains ANTLR grammars used for testing purposes.
+
+## Generated Code
+
+Do not modify the files in the following directories directly, as they are generated from the ANTLR grammar files:
+- `src/main/java/io/github/agoss94/airbag/parser/`
+- `src/test/java/io/github/agoss94/airbag/grammar/`

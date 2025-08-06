@@ -6,6 +6,8 @@ import io.github.agoss94.airbag.parser.SchemaParser;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Utility class for working with ANTLR schemas.
  */
@@ -15,20 +17,50 @@ public class Schemas {
      * Converts a {@link Schema} tree to an S-expression representation.
      * S-expressions provide a human-readable format for visualizing the nested structure of the tree.
      *
-     * @param schema     the {@link Schema} to convert.
-     * @param recognizer the ANTLR {@link Parser} to resolve rule and token names.
+     * @param schema the {@link Schema} to convert.
+     * @param parser the ANTLR {@link Parser} to resolve rule and token names.
      * @return a string representing the schema in S-expression format.
      */
-    public static String toString(Schema schema, Parser recognizer) {
-        var vocabulary = recognizer == null ? null : recognizer.getVocabulary();
+    public static String toString(Schema schema, Parser parser) {
+        return toString(schema, parser.getVocabulary(), parser.getRuleNames());
+    }
+
+    /**
+     * Converts a {@link Schema} tree to an S-expression representation.
+     *
+     * @param schema          the {@link Schema} to convert.
+     * @param recognizerClass the ANTLR {@link Recognizer} class to resolve rule and token names.
+     * @return a string representing the schema in S-expression format.
+     */
+    public static String toString(Schema schema, Class<? extends Recognizer<?, ?>> recognizerClass) {
+        Vocabulary vocabulary = null;
+        String[] ruleNames = null;
+        try {
+            vocabulary = (Vocabulary) recognizerClass.getField("VOCABULARY").get(null);
+            if (Parser.class.isAssignableFrom(recognizerClass)) {
+                ruleNames = (String[]) recognizerClass.getField("ruleNames").get(null);
+            }
+        } catch (IllegalAccessException | NoSuchFieldException ignored) {
+        }
+
+        return toString(schema, vocabulary, ruleNames);
+    }
+
+    /**
+     * Converts a {@link Schema} tree to an S-expression representation.
+     *
+     * @param schema    the {@link Schema} to convert.
+     * @param vocabulary the ANTLR {@link Vocabulary} to resolve token names.
+     * @param ruleNames the ANTLR rule names to resolve rule names.
+     * @return a string representing the schema in S-expression format.
+     */
+    public static String toString(Schema schema, Vocabulary vocabulary, String[] ruleNames) {
         switch (schema) {
             case Schema.Rule rule -> {
-                String ruleName = recognizer != null ?
-                        recognizer.getRuleNames()[rule.index()] :
-                        String.valueOf(rule.index());
+                String ruleName = getRuleName(rule.index(), ruleNames);
                 var sb = new StringBuilder("(%s".formatted(ruleName));
                 for (int i = 0; i < rule.getChildCount(); i++) {
-                    sb.append(" %s".formatted(toString(rule.getChild(i), recognizer)));
+                    sb.append(" %s".formatted(toString(rule.getChild(i), vocabulary, ruleNames)));
                 }
                 sb.append(")");
                 return sb.toString();
@@ -39,6 +71,21 @@ public class Schemas {
             case Schema.Error error -> {
                 return "(<error> %s)".formatted(tokenToString(error.token(), vocabulary));
             }
+        }
+    }
+
+    /**
+     * Returns the rule name for the given rule index.
+     *
+     * @param ruleIndex the rule index.
+     * @param ruleNames the rule names.
+     * @return the rule name.
+     */
+    private static String getRuleName(int ruleIndex, String[] ruleNames) {
+        if (ruleNames == null || ruleIndex >= ruleNames.length) {
+            return String.valueOf(ruleIndex);
+        } else {
+            return ruleNames[ruleIndex];
         }
     }
 
@@ -76,6 +123,24 @@ public class Schemas {
         var walker = new ParseTreeWalker();
         walker.walk(listener, schemaParser.schema());
         return listener.schema;
+    }
+
+    /**
+     * Parses a string in S-expression format to a {@link Schema} tree.
+     *
+     * @param string      the S-expression string to parse.
+     * @param parserClass the ANTLR {@link Parser} class used to resolve rule and token names.
+     * @return the parsed {@link Schema} tree.
+     */
+    public static Schema from(String string, Class<? extends Parser> parserClass) {
+        Parser parser = null;
+        try {
+            parser = parserClass.getConstructor(TokenStream.class).newInstance((TokenStream) null);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        return from(string, parser);
     }
 
     /**
@@ -159,6 +224,11 @@ public class Schemas {
             schema = SchemaNode.Terminal.attach(createToken(ctx), schema);
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * When exiting a literal, the parent of the current schema node becomes the new current schema node.
+         */
         @Override
         public void exitLiteral(SchemaParser.LiteralContext ctx) {
             schema = schema.getParent();
@@ -174,6 +244,11 @@ public class Schemas {
             schema = SchemaNode.Terminal.attach(createToken(ctx), schema);
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * When exiting a symbolic token, the parent of the current schema node becomes the new current schema node.
+         */
         @Override
         public void exitSymbolic(SchemaParser.SymbolicContext ctx) {
             schema = schema.getParent();
@@ -209,6 +284,11 @@ public class Schemas {
             schema = SchemaNode.Error.attach(createToken(ctx.token()), schema);
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * When exiting an error node, the parent of the current schema node becomes the new current schema node.
+         */
         @Override
         public void exitError(SchemaParser.ErrorContext ctx) {
             schema = schema.getParent();
@@ -248,4 +328,5 @@ public class Schemas {
         }
     }
 }
+
 

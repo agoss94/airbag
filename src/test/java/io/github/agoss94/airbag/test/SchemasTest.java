@@ -19,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
  */
 class SchemasTest {
 
+    /**
+     * Tests the conversion of a schema to a string with a parser.
+     */
     @Test
     void testToStringWithParser() {
         //No input needed
@@ -40,15 +43,17 @@ class SchemasTest {
         assertEquals("(stat (ID 'x') '=' (expr (INT '1')))", result);
     }
 
+    /**
+     * Tests the conversion of a string to a schema with a parser.
+     */
     @Test
     void testFromWithStringAndParserExplicitNodes() {
-        ExpressionParser parser = new ExpressionParser(null);
 
         // Define a schema string for a simple rule with a terminal child
         String schemaString = "(stat (ID 'x'))";
 
         // Convert the string to a Schema object
-        Schema resultSchema = Schemas.from(schemaString, parser);
+        Schema resultSchema = Schemas.from(schemaString, ExpressionParser.class);
 
         // Assert the top-level schema is a Rule
         assertInstanceOf(Schema.Rule.class, resultSchema);
@@ -63,15 +68,17 @@ class SchemasTest {
         assertEquals(ExpressionLexer.ID, resultTerminal.token().getType());
         assertEquals("x", resultTerminal.token().getText());
 
-        assertEquals(schemaString, Schemas.toString(resultRootRule, parser));
+        assertEquals(schemaString, Schemas.toString(resultRootRule, ExpressionParser.class));
     }
 
+    /**
+     * Tests the conversion of a complex schema string to a schema.
+     */
     @Test
     void testComplexSchema() {
-        ExpressionParser parser = new ExpressionParser(null);
         // Test a more complex schema string
         String schemaString = "(stat (ID 'x') '=' (expr (INT '1')))";
-        Schema resultSchema = Schemas.from(schemaString, parser);
+        Schema resultSchema = Schemas.from(schemaString, ExpressionParser.class);
 
         assertInstanceOf(Schema.Rule.class, resultSchema);
         Schema.Rule resultRootRule = (Schema.Rule) resultSchema;
@@ -106,9 +113,12 @@ class SchemasTest {
         assertEquals(ExpressionLexer.INT, resultIntTerminal.token().getType());
         assertEquals("1", resultIntTerminal.token().getText());
 
-        assertEquals(schemaString, Schemas.toString(resultRootRule, parser));
+        assertEquals(schemaString, Schemas.toString(resultRootRule, ExpressionParser.class));
     }
 
+    /**
+     * Tests the conversion of a parse tree to a schema.
+     */
     @Test
     void testFromParseTree() {
         String input = "x = 1\n";

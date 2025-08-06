@@ -70,7 +70,7 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
      */
     @Override
     public String toString() {
-        return Schemas.toString((Schema) this, null);
+        return Schemas.toString((Schema) this, null, null);
     }
 
     /**

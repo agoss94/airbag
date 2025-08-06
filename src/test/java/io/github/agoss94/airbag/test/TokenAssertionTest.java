@@ -29,6 +29,9 @@ class TokenAssertionTest {
         airbag = new Airbag(ExpressionLexer.class);
     }
 
+    /**
+     * Tests the tokenization of an integer.
+     */
     @Test
     void testInteger() {
         var actual = Tokens.from("1\n", ExpressionLexer.class);
@@ -40,6 +43,9 @@ class TokenAssertionTest {
         airbag.assertTokenList(expected, actual);
     }
 
+    /**
+     * Tests the tokenization of an identifier.
+     */
     @Test
     void testIdentifier() {
         var actual = Tokens.from("a\n", ExpressionLexer.class);
@@ -51,6 +57,9 @@ class TokenAssertionTest {
         airbag.assertTokenList(expected, actual);
     }
 
+    /**
+     * Tests the tokenization of an assignment.
+     */
     @Test
     void testAssignment() {
         var actual = Tokens.from("a = 1\n", ExpressionLexer.class);
@@ -64,6 +73,9 @@ class TokenAssertionTest {
         airbag.assertTokenList(expected, actual);
     }
 
+    /**
+     * Tests the tokenization of a complex expression.
+     */
     @Test
     void testComplexExpression() {
         var actual = Tokens.from("(a + b) * 2\n", ExpressionLexer.class);
@@ -81,6 +93,9 @@ class TokenAssertionTest {
         airbag.assertTokenList(expected, actual);
     }
 
+    /**
+     * Tests the tokenization of another complex expression.
+     */
     @Test
     void testAnotherComplexExpression() {
         var actual = Tokens.from("(a - 5) / b\n", ExpressionLexer.class);
@@ -98,6 +113,9 @@ class TokenAssertionTest {
         airbag.assertTokenList(expected, actual);
     }
 
+    /**
+     * Tests the tokenization of a blank line.
+     */
     @Test
     void testBlankLine() {
         var actual = Tokens.from("\n", ExpressionLexer.class);

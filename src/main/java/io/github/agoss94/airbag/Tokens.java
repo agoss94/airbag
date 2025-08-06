@@ -84,6 +84,15 @@ public final class Tokens {
     }
 
     /**
+     * Returns a new {@link Builder} for creating a {@link Token}.
+     *
+     * @return a new {@link Builder}.
+     */
+    public static Builder singleTokenOf() {
+        return new Builder();
+    }
+
+    /**
      * Creates a single {@link Token} from a given vocabulary and input string.
      *
      * @param vocabulary the ANTLR vocabulary.
@@ -231,5 +240,125 @@ public final class Tokens {
         } else {
             return null;
         }
+    }
+
+    /**
+     * A builder for creating a {@link Token}.
+     */
+    public static class Builder {
+
+        private int tokenIndex;
+        private int startIndex;
+        private int stopIndex;
+        private String txt = "";
+        private int type;
+        private int channel;
+        private int line;
+        private int charPositionInLine;
+
+        /**
+         * Sets the token index.
+         *
+         * @param tokenIndex the token index.
+         * @return the builder.
+         */
+        public Builder tokenIndex(int tokenIndex) {
+            this.tokenIndex = tokenIndex;
+            return this;
+        }
+
+        /**
+         * Sets the start index.
+         *
+         * @param startIndex the start index.
+         * @return the builder.
+         */
+        public Builder startIndex(int startIndex) {
+            this.startIndex = startIndex;
+            return this;
+        }
+
+        /**
+         * Sets the stop index.
+         *
+         * @param stopIndex the stop index.
+         * @return the builder.
+         */
+        public Builder stopIndex(int stopIndex) {
+            this.stopIndex = stopIndex;
+            return this;
+        }
+
+        /**
+         * Sets the text.
+         *
+         * @param text the text.
+         * @return the builder.
+         */
+        public Builder text(String text) {
+            this.txt = text;
+            return this;
+        }
+
+        /**
+         * Sets the type.
+         *
+         * @param type the type.
+         * @return the builder.
+         */
+        public Builder type(int type) {
+            this.type = type;
+            return this;
+        }
+
+        /**
+         * Sets the channel.
+         *
+         * @param channel the channel.
+         * @return the builder.
+         */
+        public Builder channel(int channel) {
+            this.channel = channel;
+            return this;
+        }
+
+        /**
+         * Sets the line.
+         *
+         * @param line the line.
+         * @return the builder.
+         */
+        public Builder line(int line) {
+            this.line = line;
+            return this;
+        }
+
+        /**
+         * Sets the char position in line.
+         *
+         * @param charPositionInLine the char position in line.
+         * @return the builder.
+         */
+        public Builder charPositionInLine(int charPositionInLine) {
+            this.charPositionInLine = charPositionInLine;
+            return this;
+        }
+
+        /**
+         * Builds the token.
+         *
+         * @return the token.
+         */
+        public Token get() {
+            var token = new CommonToken(type, txt);
+            token.setTokenIndex(tokenIndex);
+            token.setStartIndex(startIndex);
+            token.setStopIndex(stopIndex);
+            token.setChannel(channel);
+            token.setLine(line);
+            token.setCharPositionInLine(charPositionInLine);
+            return token;
+        }
+
     }
 }

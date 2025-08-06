@@ -35,6 +35,13 @@ public final class Utils {
                 .allMatch(i -> predicate.test(list1.get(i), list2.get(i)));
     }
 
+    /**
+     * Escapes special characters in a string.
+     *
+     * @param txt    the string to escape.
+     * @param escape the escape character.
+     * @return the escaped string.
+     */
     public static String escape(String txt, String escape) {
         if (txt != null) {
             txt = txt.replace("\n", "%sn".formatted(escape));

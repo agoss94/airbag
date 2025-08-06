@@ -22,6 +22,9 @@ public class Airbag {
      * The ANTLR vocabulary.
      */
     private Vocabulary vocabulary;
+    /**
+     * The recognizer class.
+     */
     private Class<? extends Recognizer<?, ?>> recognizerClass;
 
     /**
@@ -108,8 +111,8 @@ public class Airbag {
         Schema actual = Schemas.from(tree);
         if (!expected.equals(actual)) {
             throw new AssertionError("Schemas are not equal.\nExpected: %s\nActual:   %s".formatted(
-                    Schemas.toString(expected, (Parser) getRecognizer()),
-                    Schemas.toString(actual, (Parser) getRecognizer())));
+                    Schemas.toString(expected, recognizerClass),
+                    Schemas.toString(actual, recognizerClass)));
         }
     }
 
@@ -135,10 +138,20 @@ public class Airbag {
         return vocabulary;
     }
 
+    /**
+     * Returns the recognizer class.
+     *
+     * @return the recognizer class.
+     */
     public Class<? extends Recognizer<?, ?>> getRecognizerClass() {
         return recognizerClass;
     }
 
+    /**
+     * Sets the recognizer class.
+     *
+     * @param recognizerClass the recognizer class.
+     */
     public void setRecognizerClass(Class<? extends Recognizer<?, ?>> recognizerClass) {
         this.recognizerClass = recognizerClass;
         try {

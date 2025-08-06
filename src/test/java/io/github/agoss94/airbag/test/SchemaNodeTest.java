@@ -13,6 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 class SchemaNodeTest {
 
+    /**
+     * Tests the string representation of a simple tree.
+     */
     @Test
     void testSimpleTreeToString() {
         var root = SchemaNode.Rule.attach(0, null);
@@ -21,6 +24,9 @@ class SchemaNodeTest {
         assertEquals("(0 (1 'a') (2 'b'))", root.toString());
     }
 
+    /**
+     * Tests the string representation of a moderately complex tree.
+     */
     @Test
     void testModeratelyComplexTreeToString() {
         var root = SchemaNode.Rule.attach(0, null);
@@ -34,6 +40,9 @@ class SchemaNodeTest {
         assertEquals("(0 (1 (1 'a') (2 'b')) (4 (3 'c') (6 (4 'd'))))", root.toString());
     }
 
+    /**
+     * Tests the string representation of a literal.
+     */
     @Test
     void testLiteralToString() {
         var root = SchemaNode.Rule.attach(0, null);
@@ -41,6 +50,9 @@ class SchemaNodeTest {
         assertEquals("(0 (1 '='))", root.toString());
     }
 
+    /**
+     * Tests the string representation of an error node.
+     */
     @Test
     void testErrorNodeToString() {
         var root = SchemaNode.Rule.attach(0, null);
@@ -49,6 +61,9 @@ class SchemaNodeTest {
         assertEquals(error, root.getChild(0));
     }
 
+    /**
+     * Tests the parent-child relationship between nodes.
+     */
     @Test
     void testParentAndChild() {
         var root = SchemaNode.Rule.attach(0, null);
@@ -57,12 +72,18 @@ class SchemaNodeTest {
         assertEquals(child, root.getChild(0));
     }
 
+    /**
+     * Tests that the root node has itself as a parent.
+     */
     @Test
     void testRootNodeHasItselfAsParent() {
         var root = SchemaNode.Rule.attach(0, null);
         assertEquals(root, root.getParent());
     }
 
+    /**
+     * Tests that a terminal node cannot have children.
+     */
     @Test
     void testTerminalNodeCannotHaveChildren() {
         var root = SchemaNode.Rule.attach(0, null);
@@ -70,6 +91,9 @@ class SchemaNodeTest {
         assertThrows(IllegalArgumentException.class, () -> SchemaNode.Rule.attach(2, terminal));
     }
 
+    /**
+     * Tests that an error node cannot have children.
+     */
     @Test
     void testErrorNodeCannotHaveChildren() {
         var root = SchemaNode.Rule.attach(0, null);
@@ -77,6 +101,9 @@ class SchemaNodeTest {
         assertThrows(IllegalArgumentException.class, () -> SchemaNode.Rule.attach(2, error));
     }
 
+    /**
+     * Tests the equality of two rule nodes.
+     */
     @Test
     void testRuleEquals() {
         var root1 = SchemaNode.Rule.attach(0, null);
@@ -90,6 +117,9 @@ class SchemaNodeTest {
         assertEquals(root1, root2);
     }
 
+    /**
+     * Tests the inequality of two rule nodes.
+     */
     @Test
     void testRuleNotEquals() {
         var root1 = SchemaNode.Rule.attach(0, null);
@@ -103,6 +133,9 @@ class SchemaNodeTest {
         assertNotEquals(root1, root2);
     }
 
+    /**
+     * Tests the equality of two terminal nodes.
+     */
     @Test
     void testTerminalEquals() {
         var terminal1 = SchemaNode.Terminal.attach(new CommonToken(1, "a"), null);
@@ -111,6 +144,9 @@ class SchemaNodeTest {
         assertEquals(terminal1, terminal2);
     }
 
+    /**
+     * Tests the inequality of two terminal nodes.
+     */
     @Test
     void testTerminalNotEquals() {
         var terminal1 = SchemaNode.Terminal.attach(new CommonToken(1, "a"), null);
@@ -119,6 +155,9 @@ class SchemaNodeTest {
         assertNotEquals(terminal1, terminal2);
     }
 
+    /**
+     * Tests the equality of two error nodes.
+     */
     @Test
     void testErrorEquals() {
         var error1 = SchemaNode.Error.attach(new CommonToken(1, "unexpected"), null);
@@ -127,6 +166,9 @@ class SchemaNodeTest {
         assertEquals(error1, error2);
     }
 
+    /**
+     * Tests the inequality of two error nodes.
+     */
     @Test
     void testErrorNotEquals() {
         var error1 = SchemaNode.Error.attach(new CommonToken(1, "unexpected"), null);
