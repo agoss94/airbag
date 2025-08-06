@@ -264,11 +264,11 @@ public class Schemas {
             if (ctx instanceof SchemaParser.LiteralContext literalCtx) {
                 var literal = literalCtx.STRING().getText();
                 int index = Tokens.getTokenType(literal, parser.getVocabulary());
-                return new CommonToken(index, literal.substring(1, literal.length() - 1));
+                return new CommonToken(index, Utils.reescape(literal.substring(1, literal.length() - 1), "%"));
             } else if (ctx instanceof SchemaParser.SymbolicContext symbolicCtx) {
                 int index = getTokenIndex(symbolicCtx.index);
                 String text = symbolicCtx.STRING().getText();
-                return new CommonToken(index, text.substring(1, text.length() - 1));
+                return new CommonToken(index, Utils.reescape(text.substring(1, text.length() - 1), "%"));
             } else {
                 throw new RuntimeException();
             }

@@ -53,4 +53,22 @@ public final class Utils {
         return txt;
     }
 
+    /**
+     * Re-escapes special characters in a string.
+     *
+     * @param txt    the string to re-escape.
+     * @param escape the escape character.
+     * @return the re-escaped string.
+     */
+    public static String reescape(String txt, String escape) {
+        if (txt != null) {
+            txt = txt.replace("%sn".formatted(escape), "\n");
+            txt = txt.replace("%sr".formatted(escape), "\r");
+            txt = txt.replace("%st".formatted(escape), "\t");
+            return txt;
+        } else {
+            return null;
+        }
+    }
+
 }

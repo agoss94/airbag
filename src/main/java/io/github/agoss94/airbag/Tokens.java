@@ -1,12 +1,14 @@
 package io.github.agoss94.airbag;
 
+import io.github.agoss94.airbag.parser.TokenBaseVisitor;
+import io.github.agoss94.airbag.parser.TokenLexer;
+import io.github.agoss94.airbag.parser.TokenParser;
+import io.github.agoss94.airbag.parser.TokenVisitor;
 import org.antlr.v4.runtime.*;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Utility class for working with ANTLR {@link Token}s.
@@ -17,8 +19,7 @@ public final class Tokens {
      * The pattern to parse a single token from a string.
      */
     private static final Pattern PATTERN = Pattern.compile(
-            "\\[@(-?\\d+),(\\d+):(\\d+)='(.*)',<(.*)>,(channel=(-?\\d+),)?(\\d+):(\\d+)]"
-    );
+            "\\[@(-?\\d+),(\\d+):(\\d+)='(.*)',<(.*)>,(channel=(-?\\d+),)?(\\d+):(\\d+)]");
 
     /**
      * Private constructor to prevent instantiation.
@@ -67,8 +68,17 @@ public final class Tokens {
         if (input.isBlank()) {
             return List.of();
         }
-        String[] lines = input.split("\r?\n");
-        return Stream.of(lines).map(t -> singleToken(t, vocabulary)).toList();
+        TokenLexer lexer = new TokenLexer(CharStreams.fromString(input));
+        TokenParser parser = new TokenParser(new CommonTokenStream(lexer));
+        var visitor = new TokenBaseVisitor<List<Token>>() {
+
+            @Override
+            public List<Token> visitTokenList(TokenParser.TokenListContext ctx) {
+                var tokenListener = getTokenVisitor(vocabulary, "%");
+                return ctx.token().stream().map(tokenListener::visitToken).toList();
+            }
+        };
+        return visitor.visitTokenList(parser.tokenList());
     }
 
     /**
@@ -80,7 +90,7 @@ public final class Tokens {
      * @return a single {@link Token}.
      */
     public static Token singleToken(String input, Vocabulary vocabulary) {
-        return singleToken(input,  "%", vocabulary);
+        return singleToken(input, "%", vocabulary);
     }
 
     /**
@@ -101,21 +111,40 @@ public final class Tokens {
      * @return a single {@link Token}.
      */
     public static Token singleToken(String input, String escape, Vocabulary vocabulary) {
-        Matcher matcher = PATTERN.matcher(input);
-        if (matcher.matches()) {
-            String text = replaceEscaped(matcher.group(4), escape);
-            var token = new CommonToken(getTokenType(matcher.group(5), vocabulary), text);
-            token.setTokenIndex(Integer.parseInt(matcher.group(1)));
-            token.setStartIndex(Integer.parseInt(matcher.group(2)));
-            token.setStopIndex(Integer.parseInt(matcher.group(3)));
-            token.setChannel(matcher.group(6) != null ? Integer.parseInt(matcher.group(7)) : 0);
-            token.setLine(Integer.parseInt(matcher.group(8)));
-            token.setCharPositionInLine(Integer.parseInt(matcher.group(9)));
-            return token;
-        } else {
-            throw new RuntimeException("The line: \"%s\" does not match the pattern.".formatted(
-                    input));
-        }
+        TokenLexer lexer = new TokenLexer(CharStreams.fromString(input));
+        TokenParser parser = new TokenParser(new CommonTokenStream(lexer));
+        TokenVisitor<Token> visitor = new TokenBaseVisitor<>() {
+
+            @Override
+            public Token visitSingleToken(TokenParser.SingleTokenContext ctx) {
+                var tokenVisitor = getTokenVisitor(vocabulary, escape);
+                return tokenVisitor.visitToken(ctx.token());
+            }
+        };
+
+        return visitor.visitSingleToken(parser.singleToken());
+    }
+
+    private static TokenVisitor<Token> getTokenVisitor(Vocabulary vocabulary, String escape) {
+        return new TokenBaseVisitor<>() {
+
+            @Override
+            public Token visitToken(TokenParser.TokenContext ctx) {
+                String text = replaceEscaped(ctx.txt.getText(), escape);
+                var token = new CommonToken(getTokenType(ctx.type.getText(), vocabulary), text.substring(1, text.length() - 1));
+                token.setTokenIndex(intFrom(ctx.tokenIndex));
+                token.setStartIndex(intFrom(ctx.startIndex));
+                token.setStopIndex(intFrom(ctx.stopIndex));
+                token.setChannel(ctx.channel != null ? intFrom(ctx.channel) : Token.DEFAULT_CHANNEL);
+                token.setLine(intFrom(ctx.line));
+                token.setCharPositionInLine(intFrom(ctx.charPositionInLine));
+                return token;
+            }
+
+            private int intFrom(Token token) {
+                return Integer.parseInt(token.getText());
+            }
+        };
     }
 
     /**
@@ -157,14 +186,14 @@ public final class Tokens {
         if (t1 == null || t2 == null) {
             return false;
         }
-        return t1.getType() == t2.getType()
-                && t1.getChannel() == t2.getChannel()
-                && t1.getLine() == t2.getLine()
-                && t1.getCharPositionInLine() == t2.getCharPositionInLine()
-                && t1.getTokenIndex() == t2.getTokenIndex()
-                && t1.getStartIndex() == t2.getStartIndex()
-                && t1.getStopIndex() == t2.getStopIndex()
-                && Objects.equals(t1.getText(), t2.getText());
+        return t1.getType() == t2.getType() &&
+                t1.getChannel() == t2.getChannel() &&
+                t1.getLine() == t2.getLine() &&
+                t1.getCharPositionInLine() == t2.getCharPositionInLine() &&
+                t1.getTokenIndex() == t2.getTokenIndex() &&
+                t1.getStartIndex() == t2.getStartIndex() &&
+                t1.getStopIndex() == t2.getStopIndex() &&
+                Objects.equals(t1.getText(), t2.getText());
     }
 
     /**
