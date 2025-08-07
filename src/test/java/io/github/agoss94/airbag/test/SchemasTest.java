@@ -11,8 +11,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the {@link Schemas} utility class.
@@ -137,5 +136,26 @@ class SchemasTest {
         Schema actual = Schemas.from(tree);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void schemaWithErrorNode() {
+        String schemaString = """
+                (prog
+                  (stat
+                    (expr (INT '1'))
+                    (<error> (NEWLINE '<missing NEWLINE>'))
+                  )
+                  (stat
+                    (expr (INT '2'))
+                    (<error> (NEWLINE '<missing NEWLINE>'))
+                  )
+                  (stat
+                    (expr (INT '3'))
+                    (<error> (NEWLINE '<missing NEWLINE>'))
+                  )
+                )
+                """;
+        assertDoesNotThrow(() -> Schemas.from(schemaString, ExpressionParser.class));
     }
 }

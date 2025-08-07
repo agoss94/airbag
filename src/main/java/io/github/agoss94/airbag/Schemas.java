@@ -194,6 +194,8 @@ public class Schemas {
          */
         private Parser parser;
 
+        private boolean isError;
+
         /**
          * {@inheritDoc}
          * <p>
@@ -221,7 +223,11 @@ public class Schemas {
          */
         @Override
         public void enterLiteral(SchemaParser.LiteralContext ctx) {
-            schema = SchemaNode.Terminal.attach(createToken(ctx), schema);
+            if (isError) {
+                schema = SchemaNode.Error.attach(createToken(ctx), schema);
+            } else {
+                schema = SchemaNode.Terminal.attach(createToken(ctx), schema);
+            }
         }
 
         /**
@@ -241,7 +247,11 @@ public class Schemas {
          */
         @Override
         public void enterSymbolic(SchemaParser.SymbolicContext ctx) {
-            schema = SchemaNode.Terminal.attach(createToken(ctx), schema);
+            if (isError) {
+                schema = SchemaNode.Error.attach(createToken(ctx), schema);
+            } else {
+                schema = SchemaNode.Terminal.attach(createToken(ctx), schema);
+            }
         }
 
         /**
@@ -281,7 +291,7 @@ public class Schemas {
          */
         @Override
         public void enterError(SchemaParser.ErrorContext ctx) {
-            schema = SchemaNode.Error.attach(createToken(ctx.token()), schema);
+            isError = true;
         }
 
         /**
@@ -291,7 +301,7 @@ public class Schemas {
          */
         @Override
         public void exitError(SchemaParser.ErrorContext ctx) {
-            schema = schema.getParent();
+            isError = false;
         }
 
         /**

@@ -32,6 +32,8 @@ public sealed interface Schema permits Schema.Rule, Schema.Terminal, Schema.Erro
      */
     Schema getParent();
 
+    Schema getRoot();
+
 
     /**
      * Converts the Schema tree to an S-expression representation.

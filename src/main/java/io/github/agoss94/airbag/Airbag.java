@@ -5,12 +5,13 @@ import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
 import io.github.agoss94.airbag.parser.*;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -125,39 +126,44 @@ public class Airbag {
     public void assertTestFile(String fileName, Class<? extends Recognizer<?, ?>> recognizerClass) {
         setRecognizerClass(recognizerClass);
         try {
-            TestLexer testLexer = new TestLexer(CharStreams.fromFileName(fileName));
-            TestParser parser = new TestParser(new CommonTokenStream(testLexer));
-            TestListener listener = new TestBaseListener() {
+            TestCaseLexer testLexer = new TestCaseLexer(CharStreams.fromFileName(fileName));
+            TestCaseParser parser = new TestCaseParser(new CommonTokenStream(testLexer));
+            TestCaseParserListener listener = new TestCaseParserBaseListener() {
+
+                private String input;
 
                 @Override
-                public void enterFile(TestParser.FileContext ctx) {
-                    String input = getText(ctx.INPUT());
+                public void enterInput(TestCaseParser.InputContext ctx) {
+                    input =  Utils.reescape(getText(ctx.BLOCK()),"%");
+                }
 
-                    if (ctx.TOKEN() != null) {
-                        List<Token> expected = Tokens.from(getText(ctx.TOKEN()),
-                                getVocabulary(recognizerClass));
-                        List<Token> actual = Tokens.from(input, getLexerClass(recognizerClass));
-                        assertTokenList(expected, actual);
-                    }
+                @Override
+                public void enterToken(TestCaseParser.TokenContext ctx) {
+                    List<Token> expected = Tokens.from(getText(ctx.BLOCK()),
+                            getVocabulary(recognizerClass));
+                    List<Token> actual = Tokens.from(input, getLexerClass(recognizerClass));
+                    assertTokenList(expected, actual);
+                }
 
-                    if (ctx.TREE() != null) {
-                        try {
-                            Lexer lexer = getLexerClass(recognizerClass).getConstructor(CharStream.class).newInstance(
-                                    CharStreams.fromString(
-                                            input));
-                            CommonTokenStream tokens = new CommonTokenStream(lexer);
-                            @SuppressWarnings("unchecked") Parser parser = ((Class<? extends Parser>) recognizerClass).getConstructor(
-                                    TokenStream.class).newInstance(tokens);
-                            String[] ruleNames = parser.getRuleNames();
-                            ParseTree tree = (ParseTree) parser.getClass().getMethod(ruleNames[0]).invoke(
-                                    parser);
-                            assertSchema(Schemas.from(getText(ctx.TREE()), parser), tree);
-                        } catch (InstantiationException | IllegalAccessException |
-                                 InvocationTargetException |
-                                 NoSuchMethodException e) {
-                            throw new RuntimeException(e);
-                        }
-
+                @Override
+                public void enterTree(TestCaseParser.TreeContext ctx) {
+                    try {
+                        Lexer lexer = getLexerClass(recognizerClass).getConstructor(CharStream.class).newInstance(
+                                CharStreams.fromString(
+                                        input));
+                        CommonTokenStream tokens = new CommonTokenStream(lexer);
+                        @SuppressWarnings("unchecked")
+                        Parser parser = ((Class<? extends Parser>) recognizerClass).getConstructor(
+                                TokenStream.class).newInstance(tokens);
+                        String[] ruleNames = parser.getRuleNames();
+                        String rule = ctx.RULE() != null ? ctx.RULE().getText() : ruleNames[0];
+                        ParseTree tree = (ParseTree) parser.getClass().getMethod(rule).invoke(
+                                parser);
+                        assertSchema(Schemas.from(getText(ctx.BLOCK()), parser), tree);
+                    } catch (InstantiationException | IllegalAccessException |
+                             InvocationTargetException |
+                             NoSuchMethodException e) {
+                        throw new RuntimeException(e);
                     }
                 }
 
@@ -199,7 +205,7 @@ public class Airbag {
                     } else if (text.endsWith("\n")) {
                         text = text.substring(0, text.length() - 1);
                     }
-                    return text;
+                    return text.trim();
                 }
 
             };

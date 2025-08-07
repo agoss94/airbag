@@ -1,0 +1,8 @@
+testcase {
+    input {
+        1 * 2 + 3
+    }
+    tree (expr) {
+        (expr (expr (expr (INT '1')) '*' (expr (INT '2'))) '+' (expr (INT '3')))
+    }
+}

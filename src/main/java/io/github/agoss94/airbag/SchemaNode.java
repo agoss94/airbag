@@ -38,7 +38,7 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
             rule.children.add((Schema) this);
         } else {
             throw new IllegalArgumentException(
-                    "Error and Terminal node cannot have children");
+                    "Cannot attach a node with index %d to the tree:%n%n%s".formatted(index ,parent.getRoot()));
         }
     }
 
@@ -47,6 +47,14 @@ public sealed abstract class SchemaNode permits SchemaNode.Rule, SchemaNode.Term
      */
     public int index() {
         return index;
+    }
+
+    public Schema getRoot() {
+        if (getParent() == this) {
+            return (Schema) this;
+        } else {
+            return getParent().getRoot();
+        }
     }
 
     /**

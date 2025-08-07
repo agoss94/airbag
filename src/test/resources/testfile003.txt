@@ -1,0 +1,8 @@
+testcase {
+    input {
+        1 2 3
+    }
+    tree {
+        (prog (stat (expr (INT '1')) (<error> (NEWLINE '<missing NEWLINE>'))) (stat (expr (INT '2')) (<error> (NEWLINE '<missing NEWLINE>'))) (stat (expr (INT '3')) (<error> (NEWLINE '<missing NEWLINE>'))))
+    }
+}
